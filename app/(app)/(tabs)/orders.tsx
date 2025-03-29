@@ -2,10 +2,12 @@ import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { Clock, CircleCheck as CheckCircle2, Circle as XCircle } from 'lucide-react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
 
 const ORDERS = [
   {
     id: 1,
+    venueId: 1,
     title: 'Билборд на Невском',
     status: 'pending',
     date: '15.02.2024 - 15.03.2024',
@@ -13,6 +15,7 @@ const ORDERS = [
   },
   {
     id: 2,
+    venueId: 2,
     title: 'Реклама в лифтах ЖК "Солнечный"',
     status: 'approved',
     date: '01.03.2024 - 31.03.2024',
@@ -20,6 +23,7 @@ const ORDERS = [
   },
   {
     id: 3,
+    venueId: 3,
     title: 'Реклама на автобусах',
     status: 'rejected',
     date: '10.03.2024 - 10.04.2024',
@@ -54,6 +58,8 @@ const StatusText = ({ status }: { status: string }) => {
 };
 
 export default function OrdersScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -83,7 +89,10 @@ export default function OrdersScreen() {
                 {StatusText({ status: order.status })}
               </Text>
             </View>
-            <TouchableOpacity style={styles.detailsButton}>
+            <TouchableOpacity 
+              style={styles.detailsButton}
+              onPress={() => router.push(`/venue-details?id=${order.venueId}`)}
+            >
               <Text style={styles.detailsButtonText}>Подробнее</Text>
             </TouchableOpacity>
           </Animated.View>
