@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { Settings, LogOut, Building2, CreditCard, Bell, Shield, CircleHelp as HelpCircle } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
 
 const MENU_ITEMS = [
   {
@@ -37,6 +38,8 @@ const MENU_ITEMS = [
 ];
 
 export default function ProfileScreen() {
+  const router = useRouter();
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -63,7 +66,14 @@ export default function ProfileScreen() {
               key={item.title}
               entering={FadeInDown.delay(index * 100)}
             >
-              <TouchableOpacity style={styles.menuItem}>
+              <TouchableOpacity 
+                style={styles.menuItem}
+                onPress={() => {
+                  if (item.title === 'Мои площадки') {
+                    router.push('/my-venues');
+                  }
+                }}
+              >
                 <View style={[styles.iconContainer, { backgroundColor: `${item.color}15` }]}>
                   <Icon size={24} color={item.color} />
                 </View>
