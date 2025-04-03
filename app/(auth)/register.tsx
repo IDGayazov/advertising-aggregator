@@ -1,29 +1,49 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react-native';
+import { Mail, Lock, Eye, EyeOff, User, ArrowLeft } from 'lucide-react-native';
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
   const router = useRouter();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
-  const handleLogin = () => {
-    // Здесь будет логика авторизации
-    if (email && password) {
+  const handleRegister = () => {
+    // Здесь будет логика регистрации
+    if (name && email && password && password === confirmPassword) {
       router.replace('/(app)/(tabs)');
     }
   };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => router.back()}
+      >
+        <ArrowLeft size={24} color="#333" />
+      </TouchableOpacity>
+
       <View style={styles.header}>
-        <Text style={styles.title}>Добро пожаловать</Text>
-        <Text style={styles.subtitle}>Войдите в свой аккаунт</Text>
+        <Text style={styles.title}>Создание аккаунта</Text>
+        <Text style={styles.subtitle}>Заполните данные для регистрации</Text>
       </View>
 
       <View style={styles.form}>
+        <View style={styles.inputContainer}>
+          <User size={20} color="#666" />
+          <TextInput
+            style={styles.input}
+            placeholder="Имя"
+            value={name}
+            onChangeText={setName}
+          />
+        </View>
+
         <View style={styles.inputContainer}>
           <Mail size={20} color="#666" />
           <TextInput
@@ -58,21 +78,39 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.forgotPassword}>
-          <Text style={styles.forgotPasswordText}>Забыли пароль?</Text>
-        </TouchableOpacity>
+        <View style={styles.inputContainer}>
+          <Lock size={20} color="#666" />
+          <TextInput
+            style={styles.input}
+            placeholder="Подтвердите пароль"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            secureTextEntry={!showConfirmPassword}
+            autoCapitalize="none"
+          />
+          <TouchableOpacity 
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+            style={styles.eyeButton}
+          >
+            {showConfirmPassword ? (
+              <EyeOff size={20} color="#666" />
+            ) : (
+              <Eye size={20} color="#666" />
+            )}
+          </TouchableOpacity>
+        </View>
 
         <TouchableOpacity 
-          style={styles.loginButton}
-          onPress={handleLogin}
+          style={styles.registerButton}
+          onPress={handleRegister}
         >
-          <Text style={styles.loginButtonText}>Войти</Text>
+          <Text style={styles.registerButtonText}>Зарегистрироваться</Text>
         </TouchableOpacity>
 
-        <View style={styles.registerContainer}>
-          <Text style={styles.registerText}>Еще нет аккаунта? </Text>
-          <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-            <Text style={styles.registerLink}>Зарегистрироваться</Text>
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginText}>Уже есть аккаунт? </Text>
+          <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
+            <Text style={styles.loginLink}>Войти</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -85,7 +123,11 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: '#F9FAFF',
     padding: 20,
-    justifyContent: 'center',
+  },
+  backButton: {
+    marginTop: 60,
+    marginBottom: 20,
+    padding: 8,
   },
   header: {
     marginBottom: 40,
@@ -125,40 +167,32 @@ const styles = StyleSheet.create({
   eyeButton: {
     padding: 8,
   },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: 24,
-  },
-  forgotPasswordText: {
-    fontFamily: 'Manrope-Medium',
-    fontSize: 14,
-    color: '#6E88F5',
-  },
-  loginButton: {
+  registerButton: {
     backgroundColor: '#6E88F5',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
+    marginTop: 8,
     marginBottom: 24,
   },
-  loginButtonText: {
+  registerButtonText: {
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
     color: '#FFF',
   },
-  registerContainer: {
+  loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  registerText: {
+  loginText: {
     fontFamily: 'Manrope-Regular',
     fontSize: 14,
     color: '#666',
   },
-  registerLink: {
+  loginLink: {
     fontFamily: 'Manrope-Bold',
     fontSize: 14,
     color: '#6E88F5',
   },
-});
+}); 
