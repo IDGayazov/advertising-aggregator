@@ -1,11 +1,14 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Animated } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, MapPin, Heart } from 'lucide-react-native';
 import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../utils/theme';
 import Button from '../../components/Button';
+import { PanGestureHandler } from 'react-native-gesture-handler';
 
 const { width, height } = Dimensions.get('window');
+const MIN_SHEET_HEIGHT = height * 0.4; // Минимальная высота (закрытое состояние)
+const MAX_SHEET_HEIGHT = height * 0.8; // Максимальная высота (открытое состояние)
 
 type VenueParams = {
   id: string;
@@ -20,6 +23,42 @@ type VenueParams = {
 export default function VenueDetailsScreen() {
   const router = useRouter();
   const params = useLocalSearchParams() as VenueParams;
+  const [sheetHeight] = useState(new Animated.Value(MIN_SHEET_HEIGHT));
+  const [currentHeight, setCurrentHeight] = useState(MIN_SHEET_HEIGHT);
+
+  // Обработчик жеста перетаскивания
+  const onGestureEvent = (event: any) => {
+    const { translationY } = event.nativeEvent;
+    let newHeight = currentHeight - translationY;
+    
+    // Ограничиваем высоту между MIN и MAX
+    if (newHeight < MIN_SHEET_HEIGHT) newHeight = MIN_SHEET_HEIGHT;
+    if (newHeight > MAX_SHEET_HEIGHT) newHeight = MAX_SHEET_HEIGHT;
+    
+    sheetHeight.setValue(newHeight);
+  };
+
+  // Обработчик окончания жеста
+  const onGestureEnd = (event: any) => {
+    const { translationY } = event.nativeEvent;
+    const newHeight = currentHeight - translationY;
+    
+    // Анимированно переходим к ближайшей точке
+    let targetHeight;
+    if (newHeight > (MIN_SHEET_HEIGHT + MAX_SHEET_HEIGHT) / 2) {
+      targetHeight = MAX_SHEET_HEIGHT;
+    } else {
+      targetHeight = MIN_SHEET_HEIGHT;
+    }
+    
+    Animated.spring(sheetHeight, {
+      toValue: targetHeight,
+      useNativeDriver: false,
+      bounciness: 4,
+    }).start();
+    
+    setCurrentHeight(targetHeight);
+  };
 
   // Преобразуем цену из строки в число
   const price = parseInt(params.price || '0', 10);
@@ -93,38 +132,45 @@ export default function VenueDetailsScreen() {
         </View>
       </View>
 
-      <View style={styles.bottomSheet}>
-        <ScrollView style={styles.scrollContent}>
-          <View style={styles.infoContainer}>
-            <View style={styles.priceRow}>
-              <Text style={styles.sectionTitle}>Подробно</Text>
-              <View style={styles.priceTag}>
-                <Text style={styles.priceText}>{price.toLocaleString()} ₽</Text>
+      <PanGestureHandler
+        onGestureEvent={onGestureEvent}
+        onHandlerStateChange={onGestureEnd}
+      >
+        <Animated.View style={[styles.bottomSheet, { height: sheetHeight }]}>
+          <View style={styles.handleBar} />
+          
+          <ScrollView style={styles.scrollContent}>
+            <View style={styles.infoContainer}>
+              <View style={styles.priceRow}>
+                <Text style={styles.sectionTitle}>Подробно</Text>
+                <View style={styles.priceTag}>
+                  <Text style={styles.priceText}>{price.toLocaleString()} ₽</Text>
+                </View>
+              </View>
+              
+              <Text style={styles.description}>{params.description}</Text>
+              
+              <Text style={styles.sectionTitle}>Характеристики</Text>
+              <View style={styles.specsGrid}>
+                {getSpecs(params.category || '').map((spec, index) => (
+                  <View key={index} style={styles.specItem}>
+                    <Text style={styles.specLabel}>{spec.label}</Text>
+                    <Text style={styles.specValue}>{spec.value}</Text>
+                  </View>
+                ))}
               </View>
             </View>
-            
-            <Text style={styles.description}>{params.description}</Text>
-            
-            <Text style={styles.sectionTitle}>Характеристики</Text>
-            <View style={styles.specsGrid}>
-              {getSpecs(params.category || '').map((spec, index) => (
-                <View key={index} style={styles.specItem}>
-                  <Text style={styles.specLabel}>{spec.label}</Text>
-                  <Text style={styles.specValue}>{spec.value}</Text>
-                </View>
-              ))}
-            </View>
+          </ScrollView>
+          
+          <View style={styles.footer}>
+            <Button 
+              title="Забронировать" 
+              onPress={() => {}} 
+              style={styles.bookButton}
+            />
           </View>
-        </ScrollView>
-        
-        <View style={styles.footer}>
-          <Button 
-            title="Забронировать" 
-            onPress={() => {}} 
-            style={styles.bookButton}
-          />
-        </View>
-      </View>
+        </Animated.View>
+      </PanGestureHandler>
     </View>
   );
 }
@@ -207,8 +253,16 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    height: height * 0.4,
     ...SHADOWS.medium,
+  },
+  handleBar: {
+    alignSelf: 'center',
+    width: 40,
+    height: 5,
+    borderRadius: 3,
+    backgroundColor: COLORS.border,
+    marginTop: 10,
+    marginBottom: 10,
   },
   scrollContent: {
     flex: 1,
