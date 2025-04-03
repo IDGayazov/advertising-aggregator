@@ -1,9 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, Building2, MessageSquare } from 'lucide-react-native';
+import { validateEmail, validatePassword } from '../../utils/validation';
 
 type UserRole = 'advertiser' | 'owner' | null;
+
+interface ValidationErrors {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  name: string;
+}
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -14,10 +22,57 @@ export default function RegisterScreen() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [selectedRole, setSelectedRole] = useState<UserRole>(null);
+  const [errors, setErrors] = useState<ValidationErrors>({
+    email: '',
+    password: '',
+    confirmPassword: '',
+    name: '',
+  });
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+    confirmPassword: false,
+    name: false,
+  });
+
+  const validateForm = () => {
+    const newErrors: ValidationErrors = {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      name: '',
+    };
+
+    if (!name.trim()) {
+      newErrors.name = 'Введите имя';
+    }
+
+    if (!validateEmail(email)) {
+      newErrors.email = 'Введите корректный email';
+    }
+
+    if (!validatePassword(password)) {
+      newErrors.password = 'Пароль должен содержать минимум 8 символов, букву и цифру';
+    }
+
+    if (password !== confirmPassword) {
+      newErrors.confirmPassword = 'Пароли не совпадают';
+    }
+
+    setErrors(newErrors);
+    return !Object.values(newErrors).some(error => error !== '');
+  };
 
   const handleRegister = () => {
-    // Здесь будет логика регистрации
-    if (name && email && password && password === confirmPassword && selectedRole) {
+    const allTouched = {
+      email: true,
+      password: true,
+      confirmPassword: true,
+      name: true,
+    };
+    setTouched(allTouched);
+
+    if (validateForm()) {
       router.replace('/(app)/(tabs)');
     }
   };
@@ -92,76 +147,113 @@ export default function RegisterScreen() {
         </View>
 
         {/* Существующие поля формы */}
-        <View style={styles.inputContainer}>
-          <User size={20} color="#666" />
-          <TextInput
-            style={styles.input}
-            placeholder="Имя"
-            value={name}
-            onChangeText={setName}
-          />
+        <View style={styles.inputGroup}>
+          <View style={[
+            styles.inputContainer,
+            touched.name && errors.name && styles.inputError
+          ]}>
+            <User size={20} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="Имя"
+              value={name}
+              onChangeText={setName}
+              onBlur={() => setTouched(prev => ({ ...prev, name: true }))}
+            />
+          </View>
+          {touched.name && errors.name && (
+            <Text style={styles.errorText}>{errors.name}</Text>
+          )}
         </View>
 
-        <View style={styles.inputContainer}>
-          <Mail size={20} color="#666" />
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-          />
+        <View style={styles.inputGroup}>
+          <View style={[
+            styles.inputContainer,
+            touched.email && errors.email && styles.inputError
+          ]}>
+            <Mail size={20} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
+            />
+          </View>
+          {touched.email && errors.email && (
+            <Text style={styles.errorText}>{errors.email}</Text>
+          )}
         </View>
 
-        <View style={styles.inputContainer}>
-          <Lock size={20} color="#666" />
-          <TextInput
-            style={styles.input}
-            placeholder="Пароль"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            autoCapitalize="none"
-          />
-          <TouchableOpacity 
-            onPress={() => setShowPassword(!showPassword)}
-            style={styles.eyeButton}
-          >
-            {showPassword ? (
-              <EyeOff size={20} color="#666" />
-            ) : (
-              <Eye size={20} color="#666" />
-            )}
-          </TouchableOpacity>
+        <View style={styles.inputGroup}>
+          <View style={[
+            styles.inputContainer,
+            touched.password && errors.password && styles.inputError
+          ]}>
+            <Lock size={20} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="Пароль"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              autoCapitalize="none"
+              onBlur={() => setTouched(prev => ({ ...prev, password: true }))}
+            />
+            <TouchableOpacity 
+              onPress={() => setShowPassword(!showPassword)}
+              style={styles.eyeButton}
+            >
+              {showPassword ? (
+                <EyeOff size={20} color="#666" />
+              ) : (
+                <Eye size={20} color="#666" />
+              )}
+            </TouchableOpacity>
+          </View>
+          {touched.password && errors.password && (
+            <Text style={styles.errorText}>{errors.password}</Text>
+          )}
         </View>
 
-        <View style={styles.inputContainer}>
-          <Lock size={20} color="#666" />
-          <TextInput
-            style={styles.input}
-            placeholder="Подтвердите пароль"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry={!showConfirmPassword}
-            autoCapitalize="none"
-          />
-          <TouchableOpacity 
-            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-            style={styles.eyeButton}
-          >
-            {showConfirmPassword ? (
-              <EyeOff size={20} color="#666" />
-            ) : (
-              <Eye size={20} color="#666" />
-            )}
-          </TouchableOpacity>
+        <View style={styles.inputGroup}>
+          <View style={[
+            styles.inputContainer,
+            touched.confirmPassword && errors.confirmPassword && styles.inputError
+          ]}>
+            <Lock size={20} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="Подтвердите пароль"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
+              autoCapitalize="none"
+              onBlur={() => setTouched(prev => ({ ...prev, confirmPassword: true }))}
+            />
+            <TouchableOpacity 
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              style={styles.eyeButton}
+            >
+              {showConfirmPassword ? (
+                <EyeOff size={20} color="#666" />
+              ) : (
+                <Eye size={20} color="#666" />
+              )}
+            </TouchableOpacity>
+          </View>
+          {touched.confirmPassword && errors.confirmPassword && (
+            <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+          )}
         </View>
 
         <TouchableOpacity 
           style={[
             styles.registerButton,
-            (!name || !email || !password || !confirmPassword || !selectedRole) && styles.registerButtonDisabled
+            (!name || !email || !password || !confirmPassword || !selectedRole) && 
+            styles.registerButtonDisabled
           ]}
           onPress={handleRegister}
           disabled={!name || !email || !password || !confirmPassword || !selectedRole}
@@ -304,5 +396,18 @@ const styles = StyleSheet.create({
   registerButtonDisabled: {
     backgroundColor: '#A0A0A0',
     opacity: 0.5,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  inputError: {
+    borderColor: '#FF6B6B',
+  },
+  errorText: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 12,
+    color: '#FF6B6B',
+    marginTop: 4,
+    marginLeft: 16,
   },
 }); 
