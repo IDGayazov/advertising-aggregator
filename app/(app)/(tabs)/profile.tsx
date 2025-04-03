@@ -52,7 +52,10 @@ export default function ProfileScreen() {
             <Text style={styles.userName}>Александр Петров</Text>
             <Text style={styles.userRole}>Рекламодатель</Text>
           </View>
-          <TouchableOpacity style={styles.settingsButton}>
+          <TouchableOpacity 
+            style={styles.settingsButton}
+            onPress={() => router.push('/profile-settings')}
+          >
             <Settings size={24} color="#666" />
           </TouchableOpacity>
         </View>

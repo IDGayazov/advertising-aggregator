@@ -21,4 +21,11 @@ import { Stack } from "expo-router";
       presentation: 'modal',
     }}
   />
+  <Stack.Screen
+    name="profile-settings"
+    options={{
+      headerShown: false,
+      presentation: 'modal',
+    }}
+  />
 </Stack> 
