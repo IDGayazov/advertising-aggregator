@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Clock, CircleCheck as CheckCircle2, Circle as XCircle } from 'lucide-react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 
-const ORDERS = [
+// Начальные данные заказов
+const INITIAL_ORDERS = [
   {
     id: 1,
     venueId: 1,
@@ -59,44 +60,77 @@ const StatusText = ({ status }: { status: string }) => {
 
 export default function OrdersScreen() {
   const router = useRouter();
+  const [orders, setOrders] = useState(INITIAL_ORDERS);
+
+  const handleClearAll = () => {
+    Alert.alert(
+      'Очистить историю',
+      'Вы уверены, что хотите очистить всю историю заказов?',
+      [
+        {
+          text: 'Отмена',
+          style: 'cancel'
+        },
+        {
+          text: 'Очистить',
+          style: 'destructive',
+          onPress: () => setOrders([])
+        }
+      ]
+    );
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Мои заказы</Text>
+        {orders.length > 0 && (
+          <TouchableOpacity 
+            style={styles.clearButton}
+            onPress={handleClearAll}
+          >
+            <Text style={styles.clearButtonText}>Очистить все</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView style={styles.content}>
-        {ORDERS.map((order, index) => (
-          <Animated.View
-            key={order.id}
-            entering={FadeInUp.delay(index * 100)}
-            style={styles.card}
-          >
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>{order.title}</Text>
-              <StatusIcon status={order.status} />
-            </View>
-            <View style={styles.cardContent}>
-              <Text style={styles.cardDate}>{order.date}</Text>
-              <Text style={styles.cardPrice}>{order.price}</Text>
-              <Text style={[
-                styles.statusText,
-                order.status === 'approved' && styles.statusApproved,
-                order.status === 'rejected' && styles.statusRejected,
-                order.status === 'pending' && styles.statusPending,
-              ]}>
-                {StatusText({ status: order.status })}
-              </Text>
-            </View>
-            <TouchableOpacity 
-              style={styles.detailsButton}
-              onPress={() => router.push(`/venue-details?id=${order.venueId}`)}
+        {orders.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>У вас пока нет заказов</Text>
+          </View>
+        ) : (
+          orders.map((order, index) => (
+            <Animated.View
+              key={order.id}
+              entering={FadeInUp.delay(index * 100)}
+              style={styles.card}
             >
-              <Text style={styles.detailsButtonText}>Подробнее</Text>
-            </TouchableOpacity>
-          </Animated.View>
-        ))}
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardTitle}>{order.title}</Text>
+                <StatusIcon status={order.status} />
+              </View>
+              <View style={styles.cardContent}>
+                <Text style={styles.cardDate}>{order.date}</Text>
+                <Text style={styles.cardPrice}>{order.price}</Text>
+                <Text style={[
+                  styles.statusText,
+                  order.status === 'approved' && styles.statusApproved,
+                  order.status === 'rejected' && styles.statusRejected,
+                  order.status === 'pending' && styles.statusPending,
+                ]}>
+                  {StatusText({ status: order.status })}
+                </Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.detailsButton}
+                onPress={() => router.push(`/venue-details?id=${order.venueId}`)}
+              >
+                <Text style={styles.detailsButtonText}>Подробнее</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -113,6 +147,9 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     borderBottomWidth: 1,
     borderBottomColor: '#F0F0F0',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   title: {
     fontFamily: 'Manrope-Bold',
@@ -184,5 +221,26 @@ const styles = StyleSheet.create({
     fontFamily: 'Manrope-Bold',
     fontSize: 14,
     color: '#6E88F5',
+  },
+  clearButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  clearButtonText: {
+    fontFamily: 'Manrope-Medium',
+    fontSize: 14,
+    color: '#FF6B6B',
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  emptyStateText: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });
