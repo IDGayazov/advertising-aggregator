@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Mail, Lock, Eye, EyeOff, User, ArrowLeft } from 'lucide-react-native';
+import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, Building2, MessageSquare } from 'lucide-react-native';
+
+type UserRole = 'advertiser' | 'owner' | null;
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -11,10 +13,11 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [selectedRole, setSelectedRole] = useState<UserRole>(null);
 
   const handleRegister = () => {
     // Здесь будет логика регистрации
-    if (name && email && password && password === confirmPassword) {
+    if (name && email && password && password === confirmPassword && selectedRole) {
       router.replace('/(app)/(tabs)');
     }
   };
@@ -34,6 +37,61 @@ export default function RegisterScreen() {
       </View>
 
       <View style={styles.form}>
+        {/* Выбор роли */}
+        <Text style={styles.roleTitle}>Выберите роль</Text>
+        <View style={styles.roleContainer}>
+          <TouchableOpacity 
+            style={[
+              styles.roleButton,
+              selectedRole === 'advertiser' && styles.roleButtonActive
+            ]}
+            onPress={() => setSelectedRole('advertiser')}
+          >
+            <MessageSquare 
+              size={24} 
+              color={selectedRole === 'advertiser' ? '#FFF' : '#6E88F5'} 
+            />
+            <Text style={[
+              styles.roleText,
+              selectedRole === 'advertiser' && styles.roleTextActive
+            ]}>
+              Рекламодатель
+            </Text>
+            <Text style={[
+              styles.roleDescription,
+              selectedRole === 'advertiser' && styles.roleDescriptionActive
+            ]}>
+              Размещайте рекламу
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            style={[
+              styles.roleButton,
+              selectedRole === 'owner' && styles.roleButtonActive
+            ]}
+            onPress={() => setSelectedRole('owner')}
+          >
+            <Building2 
+              size={24} 
+              color={selectedRole === 'owner' ? '#FFF' : '#6E88F5'} 
+            />
+            <Text style={[
+              styles.roleText,
+              selectedRole === 'owner' && styles.roleTextActive
+            ]}>
+              Владелец площадки
+            </Text>
+            <Text style={[
+              styles.roleDescription,
+              selectedRole === 'owner' && styles.roleDescriptionActive
+            ]}>
+              Сдавайте площадки
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Существующие поля формы */}
         <View style={styles.inputContainer}>
           <User size={20} color="#666" />
           <TextInput
@@ -101,8 +159,12 @@ export default function RegisterScreen() {
         </View>
 
         <TouchableOpacity 
-          style={styles.registerButton}
+          style={[
+            styles.registerButton,
+            (!name || !email || !password || !confirmPassword || !selectedRole) && styles.registerButtonDisabled
+          ]}
           onPress={handleRegister}
+          disabled={!name || !email || !password || !confirmPassword || !selectedRole}
         >
           <Text style={styles.registerButtonText}>Зарегистрироваться</Text>
         </TouchableOpacity>
@@ -194,5 +256,53 @@ const styles = StyleSheet.create({
     fontFamily: 'Manrope-Bold',
     fontSize: 14,
     color: '#6E88F5',
+  },
+  roleTitle: {
+    fontFamily: 'Manrope-Bold',
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 12,
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 24,
+  },
+  roleButton: {
+    flex: 1,
+    backgroundColor: '#F0F4FF',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    marginHorizontal: 6,
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
+  roleButtonActive: {
+    backgroundColor: '#6E88F5',
+    borderColor: '#6E88F5',
+  },
+  roleText: {
+    fontFamily: 'Manrope-Bold',
+    fontSize: 14,
+    color: '#6E88F5',
+    marginTop: 8,
+    marginBottom: 4,
+  },
+  roleTextActive: {
+    color: '#FFF',
+  },
+  roleDescription: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 12,
+    color: '#666',
+    textAlign: 'center',
+  },
+  roleDescriptionActive: {
+    color: '#FFF',
+  },
+  registerButtonDisabled: {
+    backgroundColor: '#A0A0A0',
+    opacity: 0.5,
   },
 }); 
