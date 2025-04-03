@@ -1,75 +1,141 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Bell, CircleCheck as CheckCircle2, CircleAlert as AlertCircle, Clock } from 'lucide-react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
+import { Bell, MessageCircle, CreditCard, Building2 } from 'lucide-react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 
-const NOTIFICATIONS = [
+// Начальные данные уведомлений
+const INITIAL_NOTIFICATIONS = [
   {
     id: 1,
-    type: 'success',
-    title: 'Заявка подтверждена',
-    message: 'Ваша заявка на размещение рекламы на Невском проспекте одобрена',
-    time: '2 часа назад',
+    title: 'Новый заказ подтвержден',
+    message: 'Ваш заказ на размещение рекламы на Невском проспекте подтвержден',
+    type: 'order', // order, message, payment, venue
+    date: '2 часа назад',
+    read: false,
   },
   {
     id: 2,
-    type: 'warning',
-    title: 'Требуется действие',
-    message: 'Необходимо обновить данные для размещения рекламы в ТЦ "Галерея"',
-    time: '5 часов назад',
+    title: 'Поступил новый платеж',
+    message: 'Получен платеж на сумму 45 000 ₽',
+    type: 'payment',
+    date: '5 часов назад',
+    read: true,
   },
   {
     id: 3,
-    type: 'info',
-    title: 'Новое предложение',
-    message: 'Доступны новые рекламные места в категории "Лифты"',
-    time: '1 день назад',
+    title: 'Новое сообщение',
+    message: 'У вас новое сообщение от службы поддержки',
+    type: 'message',
+    date: '1 день назад',
+    read: false,
+  },
+  {
+    id: 4,
+    title: 'Модерация площадки',
+    message: 'Ваша рекламная площадка прошла модерацию',
+    type: 'venue',
+    date: '2 дня назад',
+    read: true,
   },
 ];
 
-const NotificationIcon = ({ type }: { type: string }) => {
+const NotificationIcon = ({ type, read }: { type: string; read: boolean }) => {
+  const color = read ? '#A0A0A0' : '#6E88F5';
   switch (type) {
-    case 'success':
-      return <CheckCircle2 size={24} color="#4ECDC4" />;
-    case 'warning':
-      return <AlertCircle size={24} color="#F5A623" />;
-    case 'info':
-      return <Clock size={24} color="#6E88F5" />;
+    case 'order':
+      return <Bell size={24} color={color} />;
+    case 'message':
+      return <MessageCircle size={24} color={color} />;
+    case 'payment':
+      return <CreditCard size={24} color={color} />;
+    case 'venue':
+      return <Building2 size={24} color={color} />;
     default:
-      return <Bell size={24} color="#666" />;
+      return <Bell size={24} color={color} />;
   }
 };
 
 export default function NotificationsScreen() {
+  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+
+  const handleClearAll = () => {
+    Alert.alert(
+      'Очистить уведомления',
+      'Вы уверены, что хотите очистить все уведомления?',
+      [
+        {
+          text: 'Отмена',
+          style: 'cancel'
+        },
+        {
+          text: 'Очистить',
+          style: 'destructive',
+          onPress: () => setNotifications([])
+        }
+      ]
+    );
+  };
+
+  const markAsRead = (id: number) => {
+    setNotifications(notifications.map(notification => 
+      notification.id === id ? { ...notification, read: true } : notification
+    ));
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Уведомления</Text>
-        <TouchableOpacity style={styles.clearButton}>
-          <Text style={styles.clearButtonText}>Очистить все</Text>
-        </TouchableOpacity>
+        {notifications.length > 0 && (
+          <TouchableOpacity 
+            style={styles.clearButton}
+            onPress={handleClearAll}
+          >
+            <Text style={styles.clearButtonText}>Очистить все</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <ScrollView style={styles.content}>
-        {NOTIFICATIONS.map((notification, index) => (
-          <Animated.View
-            key={notification.id}
-            entering={FadeInUp.delay(index * 100)}
-            style={[
-              styles.notificationCard,
-              styles[`notification${notification.type}`],
-            ]}
-          >
-            <View style={styles.notificationIcon}>
-              <NotificationIcon type={notification.type} />
-            </View>
-            <View style={styles.notificationContent}>
-              <Text style={styles.notificationTitle}>{notification.title}</Text>
-              <Text style={styles.notificationMessage}>{notification.message}</Text>
-              <Text style={styles.notificationTime}>{notification.time}</Text>
-            </View>
-          </Animated.View>
-        ))}
+        {notifications.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>У вас нет уведомлений</Text>
+          </View>
+        ) : (
+          notifications.map((notification, index) => (
+            <TouchableOpacity
+              key={notification.id}
+              onPress={() => markAsRead(notification.id)}
+            >
+              <Animated.View
+                entering={FadeInUp.delay(index * 100)}
+                style={[
+                  styles.card,
+                  notification.read && styles.cardRead
+                ]}
+              >
+                <View style={styles.cardHeader}>
+                  <NotificationIcon type={notification.type} read={notification.read} />
+                  <View style={styles.cardHeaderText}>
+                    <Text style={[
+                      styles.cardTitle,
+                      notification.read && styles.cardTitleRead
+                    ]}>
+                      {notification.title}
+                    </Text>
+                    <Text style={styles.cardDate}>{notification.date}</Text>
+                  </View>
+                </View>
+                <Text style={[
+                  styles.cardMessage,
+                  notification.read && styles.cardMessageRead
+                ]}>
+                  {notification.message}
+                </Text>
+              </Animated.View>
+            </TouchableOpacity>
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -96,18 +162,18 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   clearButton: {
-    padding: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   clearButtonText: {
-    fontFamily: 'Manrope-Bold',
+    fontFamily: 'Manrope-Medium',
     fontSize: 14,
-    color: '#6E88F5',
+    color: '#FF6B6B',
   },
   content: {
     padding: 20,
   },
-  notificationCard: {
-    flexDirection: 'row',
+  card: {
     backgroundColor: '#FFF',
     borderRadius: 16,
     padding: 16,
@@ -117,45 +183,55 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.05,
     shadowRadius: 5,
     elevation: 2,
+    borderLeftWidth: 4,
+    borderLeftColor: '#6E88F5',
   },
-  notificationIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
+  cardRead: {
+    borderLeftColor: '#E0E0E0',
+    backgroundColor: '#FAFAFA',
+  },
+  cardHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    marginRight: 16,
+    marginBottom: 12,
   },
-  notificationContent: {
+  cardHeaderText: {
     flex: 1,
+    marginLeft: 12,
   },
-  notificationTitle: {
+  cardTitle: {
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
     color: '#333',
     marginBottom: 4,
   },
-  notificationMessage: {
-    fontFamily: 'Manrope-Regular',
-    fontSize: 14,
+  cardTitleRead: {
     color: '#666',
-    marginBottom: 8,
   },
-  notificationTime: {
+  cardDate: {
     fontFamily: 'Manrope-Regular',
     fontSize: 12,
     color: '#999',
   },
-  notificationsuccess: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#4ECDC4',
+  cardMessage: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 20,
   },
-  notificationwarning: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#F5A623',
+  cardMessageRead: {
+    color: '#999',
   },
-  notificationinfo: {
-    borderLeftWidth: 4,
-    borderLeftColor: '#6E88F5',
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  emptyStateText: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
   },
 });

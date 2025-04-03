@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Alert } from 'react-native';
 import { Settings, LogOut, Building2, CreditCard, Bell, Shield, CircleHelp as HelpCircle } from 'lucide-react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
@@ -40,6 +40,27 @@ const MENU_ITEMS = [
 export default function ProfileScreen() {
   const router = useRouter();
 
+  const handleLogout = () => {
+    Alert.alert(
+      'Выход из аккаунта',
+      'Вы уверены, что хотите выйти?',
+      [
+        {
+          text: 'Отмена',
+          style: 'cancel'
+        },
+        {
+          text: 'Выйти',
+          style: 'destructive',
+          onPress: () => {
+            // Здесь можно добавить очистку токена авторизации
+            router.replace('/(auth)/login');
+          }
+        }
+      ]
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -52,7 +73,10 @@ export default function ProfileScreen() {
             <Text style={styles.userName}>Александр Петров</Text>
             <Text style={styles.userRole}>Рекламодатель</Text>
           </View>
-          <TouchableOpacity style={styles.settingsButton}>
+          <TouchableOpacity 
+            style={styles.settingsButton}
+            onPress={() => router.push('/profile-settings')}
+          >
             <Settings size={24} color="#666" />
           </TouchableOpacity>
         </View>
@@ -86,7 +110,10 @@ export default function ProfileScreen() {
           );
         })}
 
-        <TouchableOpacity style={styles.logoutButton}>
+        <TouchableOpacity 
+          style={styles.logoutButton}
+          onPress={handleLogout}
+        >
           <LogOut size={24} color="#FF6B6B" />
           <Text style={styles.logoutText}>Выйти из аккаунта</Text>
         </TouchableOpacity>
