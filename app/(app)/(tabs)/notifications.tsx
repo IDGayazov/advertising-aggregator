@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
 import { Bell, MessageCircle, CreditCard, Building2 } from 'lucide-react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
+import { COLORS, SHADOWS, SPACING, LAYOUT } from '../../../utils/theme';
 
 // Начальные данные уведомлений
 const INITIAL_NOTIFICATIONS = [
@@ -40,18 +41,18 @@ const INITIAL_NOTIFICATIONS = [
 ];
 
 const NotificationIcon = ({ type, read }: { type: string; read: boolean }) => {
-  const color = read ? '#A0A0A0' : '#6E88F5';
+  const color = read ? COLORS.textLight : COLORS.primary;
   switch (type) {
     case 'order':
-      return <Bell size={24} color={color} />;
+      return <Bell size={22} color={color} />;
     case 'message':
-      return <MessageCircle size={24} color={color} />;
+      return <MessageCircle size={22} color={color} />;
     case 'payment':
-      return <CreditCard size={24} color={color} />;
+      return <CreditCard size={22} color={color} />;
     case 'venue':
-      return <Building2 size={24} color={color} />;
+      return <Building2 size={22} color={color} />;
     default:
-      return <Bell size={24} color={color} />;
+      return <Bell size={22} color={color} />;
   }
 };
 
@@ -81,11 +82,21 @@ export default function NotificationsScreen() {
       notification.id === id ? { ...notification, read: true } : notification
     ));
   };
+  
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Уведомления</Text>
+        <Text style={styles.screenTitle}>Уведомления</Text>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>Обновления</Text>
+          {unreadCount > 0 && (
+            <View style={styles.badgeContainer}>
+              <Text style={styles.badgeText}>{unreadCount}</Text>
+            </View>
+          )}
+        </View>
         {notifications.length > 0 && (
           <TouchableOpacity 
             style={styles.clearButton}
@@ -96,7 +107,11 @@ export default function NotificationsScreen() {
         )}
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {notifications.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>У вас нет уведомлений</Text>
@@ -106,6 +121,7 @@ export default function NotificationsScreen() {
             <TouchableOpacity
               key={notification.id}
               onPress={() => markAsRead(notification.id)}
+              activeOpacity={0.7}
             >
               <Animated.View
                 entering={FadeInUp.delay(index * 100)}
@@ -114,9 +130,12 @@ export default function NotificationsScreen() {
                   notification.read && styles.cardRead
                 ]}
               >
-                <View style={styles.cardHeader}>
+                <View style={styles.cardIconContainer}>
                   <NotificationIcon type={notification.type} read={notification.read} />
-                  <View style={styles.cardHeaderText}>
+                  {!notification.read && <View style={styles.unreadDot} />}
+                </View>
+                <View style={styles.cardContent}>
+                  <View style={styles.cardHeader}>
                     <Text style={[
                       styles.cardTitle,
                       notification.read && styles.cardTitleRead
@@ -125,13 +144,13 @@ export default function NotificationsScreen() {
                     </Text>
                     <Text style={styles.cardDate}>{notification.date}</Text>
                   </View>
+                  <Text style={[
+                    styles.cardMessage,
+                    notification.read && styles.cardMessageRead
+                  ]}>
+                    {notification.message}
+                  </Text>
                 </View>
-                <Text style={[
-                  styles.cardMessage,
-                  notification.read && styles.cardMessageRead
-                ]}>
-                  {notification.message}
-                </Text>
               </Animated.View>
             </TouchableOpacity>
           ))
@@ -144,94 +163,127 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFF',
+    backgroundColor: COLORS.background,
   },
   header: {
-    backgroundColor: '#FFF',
-    padding: 20,
+    backgroundColor: COLORS.white,
+    padding: SPACING.lg,
     paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    ...SHADOWS.small,
+  },
+  screenTitle: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    marginBottom: SPACING.xs,
+  },
+  titleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: SPACING.md,
   },
   title: {
-    fontFamily: 'Manrope-Bold',
-    fontSize: 28,
-    color: '#333',
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginRight: SPACING.sm,
+  },
+  badgeContainer: {
+    backgroundColor: COLORS.primary,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  badgeText: {
+    color: COLORS.white,
+    fontSize: 12,
+    fontWeight: '700',
   },
   clearButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    position: 'absolute',
+    top: 60,
+    right: SPACING.lg,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
   },
   clearButtonText: {
-    fontFamily: 'Manrope-Medium',
     fontSize: 14,
-    color: '#FF6B6B',
+    color: COLORS.error,
   },
   content: {
-    padding: 20,
+    flex: 1,
+  },
+  contentContainer: {
+    padding: SPACING.lg,
   },
   card: {
-    backgroundColor: '#FFF',
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 5,
-    elevation: 2,
-    borderLeftWidth: 4,
-    borderLeftColor: '#6E88F5',
+    backgroundColor: COLORS.white,
+    borderRadius: LAYOUT.borderRadius.medium,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    flexDirection: 'row',
+    ...SHADOWS.small,
   },
   cardRead: {
-    borderLeftColor: '#E0E0E0',
-    backgroundColor: '#FAFAFA',
+    backgroundColor: COLORS.background,
+  },
+  cardIconContainer: {
+    marginRight: SPACING.md,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  unreadDot: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: COLORS.primary,
+  },
+  cardContent: {
+    flex: 1,
   },
   cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  cardHeaderText: {
-    flex: 1,
-    marginLeft: 12,
+    marginBottom: SPACING.xs,
   },
   cardTitle: {
-    fontFamily: 'Manrope-Bold',
     fontSize: 16,
-    color: '#333',
-    marginBottom: 4,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: 2,
   },
   cardTitleRead: {
-    color: '#666',
+    fontWeight: '600',
+    color: COLORS.textLight,
   },
   cardDate: {
-    fontFamily: 'Manrope-Regular',
     fontSize: 12,
-    color: '#999',
+    color: COLORS.textLight,
   },
   cardMessage: {
-    fontFamily: 'Manrope-Regular',
     fontSize: 14,
-    color: '#666',
+    color: COLORS.text,
     lineHeight: 20,
   },
   cardMessageRead: {
-    color: '#999',
+    color: COLORS.textLight,
   },
   emptyState: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 100,
   },
   emptyStateText: {
-    fontFamily: 'Manrope-Regular',
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textLight,
     textAlign: 'center',
   },
 });

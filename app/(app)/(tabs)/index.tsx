@@ -1,7 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image } from 'react-native';
-import { Search, FileSliders as Sliders } from 'lucide-react-native';
+import { Search, Sliders, MapPin } from 'lucide-react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
+import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../../utils/theme';
+import Card from '../../../components/Card';
 
 const CATEGORIES = ['Все', 'Билборды', 'Лифты', 'Автобусы', 'Мероприятия'];
 
@@ -50,6 +53,7 @@ const VENUES: Venue[] = [
 export default function CatalogScreen() {
   const [selectedCategory, setSelectedCategory] = React.useState('Все');
   const [searchQuery, setSearchQuery] = React.useState('');
+  const router = useRouter();
 
   // Фильтрация площадок по категории и поисковому запросу
   const filteredVenues = VENUES.filter(venue => {
@@ -59,29 +63,50 @@ export default function CatalogScreen() {
     return matchesCategory && matchesSearch;
   });
 
+  const navigateToDetails = (venue: Venue) => {
+    router.push({
+      pathname: '/venue-details',
+      params: {
+        id: venue.id,
+        title: venue.title,
+        location: venue.location,
+        description: venue.description,
+        price: venue.price,
+        category: venue.category,
+        image: venue.image
+      }
+    });
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Каталог площадок</Text>
+        <Text style={styles.welcomeText}>Привет, Александр</Text>
+        <Text style={styles.title}>Где разместить рекламу?</Text>
+        
         <View style={styles.searchContainer}>
-          <Search size={20} color="#666" style={styles.searchIcon} />
+          <Search size={20} color={COLORS.textLight} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Поиск площадок..."
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.textLight}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
           <TouchableOpacity style={styles.filterButton}>
-            <Sliders size={20} color="#6E88F5" />
+            <Sliders size={20} color={COLORS.primary} />
           </TouchableOpacity>
         </View>
-        <ScrollView
+      </View>
+
+      <View style={styles.categoriesWrapper}>
+        <ScrollView 
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.categoriesContainer}
+          contentContainerStyle={styles.categoriesContent}
         >
-          {CATEGORIES.map((category, index) => (
+          {CATEGORIES.map((category) => (
             <TouchableOpacity
               key={category}
               onPress={() => setSelectedCategory(category)}
@@ -103,24 +128,26 @@ export default function CatalogScreen() {
         </ScrollView>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.sectionTitle}>Рекомендуемые площадки</Text>
+        
         {filteredVenues.map((venue, index) => (
           <Animated.View
             key={venue.id}
             entering={FadeInRight.delay(index * 100)}
-            style={styles.card}
+            style={styles.cardContainer}
           >
-            <Image 
-              source={{ uri: venue.image }}
-              style={styles.cardImage}
-              resizeMode="cover"
+            <Card
+              title={venue.title}
+              image={venue.image}
+              price={`${venue.price.toLocaleString()} ₽/мес`}
+              location={venue.location}
+              onPress={() => navigateToDetails(venue)}
             />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{venue.title}</Text>
-              <Text style={styles.cardLocation}>{venue.location}</Text>
-              <Text style={styles.cardDescription}>{venue.description}</Text>
-              <Text style={styles.cardPrice}>от {venue.price.toLocaleString()} ₽/мес</Text>
-            </View>
           </Animated.View>
         ))}
       </ScrollView>
@@ -131,108 +158,91 @@ export default function CatalogScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFF',
+    backgroundColor: COLORS.background,
   },
   header: {
-    backgroundColor: '#FFF',
-    padding: 20,
+    backgroundColor: COLORS.white,
+    padding: SPACING.lg,
     paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    ...SHADOWS.small,
+  },
+  welcomeText: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginBottom: SPACING.xs,
   },
   title: {
-    fontFamily: 'Manrope-Bold',
-    fontSize: 28,
-    color: '#333',
-    marginBottom: 20,
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.lg,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFF',
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 20,
+    backgroundColor: COLORS.background,
+    borderRadius: LAYOUT.borderRadius.medium,
+    padding: SPACING.sm,
+    marginBottom: SPACING.sm,
   },
   searchIcon: {
-    marginRight: 10,
+    marginRight: SPACING.sm,
   },
   searchInput: {
     flex: 1,
-    fontFamily: 'Manrope-Regular',
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text,
   },
   filterButton: {
-    padding: 5,
+    padding: SPACING.xs,
+  },
+  categoriesWrapper: {
+    marginVertical: SPACING.md,
   },
   categoriesContainer: {
-    flexDirection: 'row',
-    marginTop: 10,
+    maxHeight: 44,
+  },
+  categoriesContent: {
+    paddingHorizontal: SPACING.lg,
   },
   categoryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderRadius: 20,
-    marginRight: 10,
-    backgroundColor: '#F9FAFF',
+    marginRight: SPACING.sm,
+    backgroundColor: COLORS.white,
+    ...SHADOWS.small,
+    height: 36,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryButtonActive: {
-    backgroundColor: '#6E88F5',
+    backgroundColor: COLORS.primary,
   },
   categoryText: {
-    fontFamily: 'Manrope-Regular',
     fontSize: 14,
-    color: '#666',
+    color: COLORS.text,
   },
   categoryTextActive: {
-    color: '#FFF',
-    fontFamily: 'Manrope-Bold',
+    color: COLORS.white,
+    fontWeight: '600',
   },
   content: {
-    padding: 20,
+    flex: 1,
   },
-  card: {
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+  contentContainer: {
+    padding: SPACING.lg,
+    paddingTop: 0,
   },
-  cardImage: {
-    height: 180,
-    backgroundColor: '#F0F0F0',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    width: '100%',
-  },
-  cardContent: {
-    padding: 20,
-  },
-  cardTitle: {
-    fontFamily: 'Manrope-Bold',
+  sectionTitle: {
     fontSize: 18,
-    color: '#333',
-    marginBottom: 8,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.md,
   },
-  cardLocation: {
-    fontFamily: 'Manrope-Regular',
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
-  },
-  cardDescription: {
-    fontFamily: 'Manrope-Regular',
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
-  },
-  cardPrice: {
-    fontFamily: 'Manrope-Bold',
-    fontSize: 16,
-    color: '#6E88F5',
-  },
+  cardContainer: {
+    marginBottom: SPACING.md,
+  }
 });

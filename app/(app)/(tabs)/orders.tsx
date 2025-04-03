@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Alert } from 'react-native';
-import { Clock, CircleCheck as CheckCircle2, Circle as XCircle } from 'lucide-react-native';
+import { Clock, CircleCheck as CheckCircle2, XCircle, ChevronRight } from 'lucide-react-native';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
+import { COLORS, SHADOWS, SPACING, LAYOUT } from '../../../utils/theme';
+import Button from '../../../components/Button';
 
 // Начальные данные заказов
 const INITIAL_ORDERS = [
@@ -35,11 +37,11 @@ const INITIAL_ORDERS = [
 const StatusIcon = ({ status }: { status: string }) => {
   switch (status) {
     case 'pending':
-      return <Clock size={24} color="#F5A623" />;
+      return <Clock size={20} color={COLORS.primary} />;
     case 'approved':
-      return <CheckCircle2 size={24} color="#4ECDC4" />;
+      return <CheckCircle2 size={20} color={COLORS.success} />;
     case 'rejected':
-      return <XCircle size={24} color="#FF6B6B" />;
+      return <XCircle size={20} color={COLORS.error} />;
     default:
       return null;
   }
@@ -83,7 +85,8 @@ export default function OrdersScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Мои заказы</Text>
+        <Text style={styles.screenTitle}>Заказы</Text>
+        <Text style={styles.title}>Мои рекламные кампании</Text>
         {orders.length > 0 && (
           <TouchableOpacity 
             style={styles.clearButton}
@@ -94,10 +97,19 @@ export default function OrdersScreen() {
         )}
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
         {orders.length === 0 ? (
           <View style={styles.emptyState}>
             <Text style={styles.emptyStateText}>У вас пока нет заказов</Text>
+            <Button 
+              title="Перейти в каталог" 
+              onPress={() => router.push('/')}
+              style={styles.emptyStateButton}
+            />
           </View>
         ) : (
           orders.map((order, index) => (
@@ -107,26 +119,31 @@ export default function OrdersScreen() {
               style={styles.card}
             >
               <View style={styles.cardHeader}>
+                <View style={styles.statusContainer}>
+                  <StatusIcon status={order.status} />
+                  <Text style={[
+                    styles.statusText,
+                    order.status === 'approved' && styles.statusApproved,
+                    order.status === 'rejected' && styles.statusRejected,
+                    order.status === 'pending' && styles.statusPending,
+                  ]}>
+                    {StatusText({ status: order.status })}
+                  </Text>
+                </View>
                 <Text style={styles.cardTitle}>{order.title}</Text>
-                <StatusIcon status={order.status} />
               </View>
+              
               <View style={styles.cardContent}>
                 <Text style={styles.cardDate}>{order.date}</Text>
                 <Text style={styles.cardPrice}>{order.price}</Text>
-                <Text style={[
-                  styles.statusText,
-                  order.status === 'approved' && styles.statusApproved,
-                  order.status === 'rejected' && styles.statusRejected,
-                  order.status === 'pending' && styles.statusPending,
-                ]}>
-                  {StatusText({ status: order.status })}
-                </Text>
               </View>
+              
               <TouchableOpacity 
                 style={styles.detailsButton}
                 onPress={() => router.push(`/venue-details?id=${order.venueId}`)}
               >
                 <Text style={styles.detailsButtonText}>Подробнее</Text>
+                <ChevronRight size={16} color={COLORS.primary} />
               </TouchableOpacity>
             </Animated.View>
           ))
@@ -139,108 +156,117 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFF',
+    backgroundColor: COLORS.background,
   },
   header: {
-    backgroundColor: '#FFF',
-    padding: 20,
+    backgroundColor: COLORS.white,
+    padding: SPACING.lg,
     paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    ...SHADOWS.small,
+  },
+  screenTitle: {
+    fontSize: 16,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    marginBottom: SPACING.xs,
   },
   title: {
-    fontFamily: 'Manrope-Bold',
-    fontSize: 28,
-    color: '#333',
+    fontSize: 22,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.md,
   },
   content: {
-    padding: 20,
+    flex: 1,
+  },
+  contentContainer: {
+    padding: SPACING.lg,
   },
   card: {
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    backgroundColor: COLORS.white,
+    borderRadius: LAYOUT.borderRadius.medium,
+    padding: SPACING.md,
+    marginBottom: SPACING.md,
+    ...SHADOWS.small,
   },
   cardHeader: {
+    marginBottom: SPACING.md,
+  },
+  statusContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: SPACING.xs,
   },
   cardTitle: {
-    fontFamily: 'Manrope-Bold',
     fontSize: 18,
-    color: '#333',
-    flex: 1,
-    marginRight: 10,
+    fontWeight: '700',
+    color: COLORS.text,
   },
   cardContent: {
-    marginBottom: 15,
+    marginBottom: SPACING.md,
   },
   cardDate: {
-    fontFamily: 'Manrope-Regular',
     fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
+    color: COLORS.textLight,
+    marginBottom: SPACING.xs,
   },
   cardPrice: {
-    fontFamily: 'Manrope-Bold',
     fontSize: 16,
-    color: '#6E88F5',
-    marginBottom: 10,
+    fontWeight: '700',
+    color: COLORS.primary,
   },
   statusText: {
-    fontFamily: 'Manrope-Bold',
     fontSize: 14,
+    fontWeight: '600',
+    marginLeft: SPACING.xs,
   },
   statusApproved: {
-    color: '#4ECDC4',
+    color: COLORS.success,
   },
   statusRejected: {
-    color: '#FF6B6B',
+    color: COLORS.error,
   },
   statusPending: {
-    color: '#F5A623',
+    color: COLORS.primary,
   },
   detailsButton: {
-    backgroundColor: '#F9FAFF',
-    padding: 12,
-    borderRadius: 12,
+    flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    backgroundColor: COLORS.background,
+    padding: SPACING.sm,
+    borderRadius: LAYOUT.borderRadius.medium,
   },
   detailsButtonText: {
-    fontFamily: 'Manrope-Bold',
     fontSize: 14,
-    color: '#6E88F5',
+    fontWeight: '600',
+    color: COLORS.primary,
   },
   clearButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    position: 'absolute',
+    top: 60,
+    right: SPACING.lg,
+    paddingHorizontal: SPACING.sm,
+    paddingVertical: SPACING.xs,
   },
   clearButtonText: {
-    fontFamily: 'Manrope-Medium',
     fontSize: 14,
-    color: '#FF6B6B',
+    color: COLORS.error,
   },
   emptyState: {
-    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingTop: 100,
   },
   emptyStateText: {
-    fontFamily: 'Manrope-Regular',
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textLight,
     textAlign: 'center',
+    marginBottom: SPACING.lg,
   },
+  emptyStateButton: {
+    maxWidth: 200,
+  }
 });
