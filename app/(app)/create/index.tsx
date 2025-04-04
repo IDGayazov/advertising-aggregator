@@ -8,6 +8,8 @@ const TYPES = ['Билборд', 'Лифт', 'Автобус', 'Мероприя
 export default function CreateAdSpaceScreen() {
   const [selectedType, setSelectedType] = useState('Билборд');
   const [currentStep, setCurrentStep] = useState(1);
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
 
   const renderStep = () => {
     switch (currentStep) {
@@ -97,6 +99,39 @@ export default function CreateAdSpaceScreen() {
                   placeholderTextColor="#999"
                   keyboardType="numeric"
                 />
+              </View>
+            </View>
+            
+            <View style={styles.inputContainer}>
+              <Text style={styles.label}>Период доступности</Text>
+              <View style={styles.dateRangeContainer}>
+                <View style={styles.dateInputContainer}>
+                  <Text style={styles.dateLabel}>С</Text>
+                  <View style={styles.inputWithIcon}>
+                    <Calendar size={20} color="#666" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.inputWithIconField}
+                      placeholder="дд.мм.гггг"
+                      placeholderTextColor="#999"
+                      value={startDate}
+                      onChangeText={setStartDate}
+                    />
+                  </View>
+                </View>
+                
+                <View style={styles.dateInputContainer}>
+                  <Text style={styles.dateLabel}>По</Text>
+                  <View style={styles.inputWithIcon}>
+                    <Calendar size={20} color="#666" style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.inputWithIconField}
+                      placeholder="дд.мм.гггг"
+                      placeholderTextColor="#999"
+                      value={endDate}
+                      onChangeText={setEndDate}
+                    />
+                  </View>
+                </View>
               </View>
             </View>
           </View>
@@ -251,60 +286,79 @@ const styles = StyleSheet.create({
     borderStyle: 'dashed',
   },
   uploadButtonText: {
+    color: '#6E88F5',
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
-    color: '#6E88F5',
     marginLeft: 10,
   },
   inputWithIcon: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#F9FAFF',
     borderRadius: 12,
-    padding: 15,
+    paddingHorizontal: 15,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   inputIcon: {
     marginRight: 10,
   },
   inputWithIconField: {
     flex: 1,
+    padding: 15,
     fontFamily: 'Manrope-Regular',
     fontSize: 16,
     color: '#333',
   },
   footer: {
-    flexDirection: 'row',
-    padding: 20,
     backgroundColor: '#FFF',
+    padding: 20,
+    paddingBottom: 30,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     borderTopWidth: 1,
     borderTopColor: '#F0F0F0',
   },
   backButton: {
-    flex: 1,
-    backgroundColor: '#F9FAFF',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
     borderRadius: 12,
-    padding: 15,
-    marginRight: 10,
-    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#6E88F5',
   },
   backButtonText: {
+    color: '#6E88F5',
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
-    color: '#666',
   },
   nextButton: {
-    flex: 2,
     backgroundColor: '#6E88F5',
+    paddingVertical: 12,
+    paddingHorizontal: 30,
     borderRadius: 12,
-    padding: 15,
+    flex: 1,
+    marginLeft: 10,
     alignItems: 'center',
   },
   submitButton: {
     backgroundColor: '#4ECDC4',
   },
   nextButtonText: {
+    color: '#FFF',
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
-    color: '#FFF',
+  },
+  dateRangeContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dateInputContainer: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  dateLabel: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 8,
   },
 });

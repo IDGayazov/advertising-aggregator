@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { COLORS, SHADOWS, LAYOUT, SPACING, TYPOGRAPHY } from '../utils/theme';
-import { Star } from 'lucide-react-native';
+import { Star, Calendar } from 'lucide-react-native';
 
 interface CardProps {
   title: string;
@@ -10,6 +10,8 @@ interface CardProps {
   location?: string;
   rating?: number;
   reviews?: number;
+  startDate?: string;
+  endDate?: string;
   style?: ViewStyle;
   onPress?: () => void;
 }
@@ -21,11 +23,20 @@ export default function Card({
   location,
   rating,
   reviews,
+  startDate,
+  endDate,
   style,
   onPress,
 }: CardProps) {
   // Преобразуем цену в строку с правильным форматированием
   const formattedPrice = typeof price === 'number' ? `₽${price.toLocaleString()}` : price;
+
+  // Форматируем даты
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+  };
 
   return (
     <TouchableOpacity
@@ -50,6 +61,15 @@ export default function Card({
         
         {location && (
           <Text style={styles.location} numberOfLines={1}>{location}</Text>
+        )}
+        
+        {startDate && endDate && (
+          <View style={styles.dateContainer}>
+            <Calendar size={14} color={COLORS.textLight} />
+            <Text style={styles.dateText}>
+              {formatDate(startDate)} - {formatDate(endDate)}
+            </Text>
+          </View>
         )}
         
         <Text style={styles.price}>{formattedPrice}</Text>
@@ -99,6 +119,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.textLight,
     marginBottom: SPACING.xs,
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  dateText: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginLeft: SPACING.xs,
   },
   price: {
     fontSize: 16,

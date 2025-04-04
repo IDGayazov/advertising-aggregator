@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Animated, StatusBar, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, MapPin, Search, X } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Search, X, Calendar } from 'lucide-react-native';
 import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../utils/theme';
 import Button from '../../components/Button';
 import { PanGestureHandler } from 'react-native-gesture-handler';
@@ -18,6 +18,8 @@ type VenueParams = {
   price: string;
   category: string;
   image: string;
+  startDate: string;
+  endDate: string;
 }
 
 export default function VenueDetailsScreen() {
@@ -26,6 +28,13 @@ export default function VenueDetailsScreen() {
   const [sheetHeight] = useState(new Animated.Value(MIN_SHEET_HEIGHT));
   const [currentHeight, setCurrentHeight] = useState(MIN_SHEET_HEIGHT);
   const [imageModalVisible, setImageModalVisible] = useState(false);
+
+  // Форматируем даты
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+  };
 
   // Обработчик жеста перетаскивания
   const onGestureEvent = (event: any) => {
@@ -136,6 +145,14 @@ export default function VenueDetailsScreen() {
           <MapPin size={16} color={COLORS.white} />
           <Text style={styles.locationWhite}>{params.location}</Text>
         </View>
+        {params.startDate && params.endDate && (
+          <View style={styles.dateContainerWhite}>
+            <Calendar size={16} color={COLORS.white} />
+            <Text style={styles.dateWhite}>
+              {formatDate(params.startDate)} - {formatDate(params.endDate)}
+            </Text>
+          </View>
+        )}
       </View>
 
       {/* Modal для полноэкранного просмотра фото */}
@@ -177,6 +194,23 @@ export default function VenueDetailsScreen() {
                   <Text style={styles.priceText}>{price.toLocaleString()} ₽</Text>
                 </View>
               </View>
+              
+              {params.startDate && params.endDate && (
+                <View style={styles.availabilityContainer}>
+                  <Text style={styles.availabilityTitle}>Доступно для бронирования</Text>
+                  <View style={styles.dateRangeContainer}>
+                    <View style={styles.dateBox}>
+                      <Text style={styles.dateLabel}>С</Text>
+                      <Text style={styles.dateValue}>{formatDate(params.startDate)}</Text>
+                    </View>
+                    <View style={styles.dateDivider} />
+                    <View style={styles.dateBox}>
+                      <Text style={styles.dateLabel}>По</Text>
+                      <Text style={styles.dateValue}>{formatDate(params.endDate)}</Text>
+                    </View>
+                  </View>
+                </View>
+              )}
               
               <Text style={styles.description}>{params.description}</Text>
               
@@ -392,5 +426,52 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
+  },
+  dateContainerWhite: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: SPACING.xs,
+  },
+  dateWhite: {
+    fontSize: 14,
+    color: COLORS.white,
+    marginLeft: SPACING.xs,
+    fontWeight: '500',
+  },
+  availabilityContainer: {
+    backgroundColor: 'rgba(180, 140, 47, 0.1)',
+    borderRadius: LAYOUT.borderRadius.medium,
+    padding: SPACING.md,
+    marginVertical: SPACING.md,
+  },
+  availabilityTitle: {
+    fontWeight: '600',
+    fontSize: 16,
+    color: COLORS.primary,
+    marginBottom: SPACING.sm,
+  },
+  dateRangeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  dateBox: {
+    flex: 1,
+  },
+  dateLabel: {
+    fontSize: 12,
+    color: COLORS.textLight,
+    marginBottom: 4,
+  },
+  dateValue: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: COLORS.text,
+  },
+  dateDivider: {
+    width: 10,
+    height: 1,
+    backgroundColor: COLORS.textLight,
+    marginHorizontal: SPACING.sm,
   },
 }); 
