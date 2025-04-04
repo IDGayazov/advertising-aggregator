@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Animated, StatusBar } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Animated, StatusBar, Modal } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, MapPin, Heart } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Search, X } from 'lucide-react-native';
 import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../utils/theme';
 import Button from '../../components/Button';
 import { PanGestureHandler } from 'react-native-gesture-handler';
@@ -25,6 +25,7 @@ export default function VenueDetailsScreen() {
   const params = useLocalSearchParams() as VenueParams;
   const [sheetHeight] = useState(new Animated.Value(MIN_SHEET_HEIGHT));
   const [currentHeight, setCurrentHeight] = useState(MIN_SHEET_HEIGHT);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
 
   // Обработчик жеста перетаскивания
   const onGestureEvent = (event: any) => {
@@ -121,8 +122,11 @@ export default function VenueDetailsScreen() {
           <ArrowLeft size={24} color={COLORS.white} />
         </TouchableOpacity>
         
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Heart size={24} color={COLORS.white} />
+        <TouchableOpacity 
+          style={styles.searchButton}
+          onPress={() => setImageModalVisible(true)}
+        >
+          <Search size={24} color={COLORS.white} />
         </TouchableOpacity>
       </View>
 
@@ -133,6 +137,30 @@ export default function VenueDetailsScreen() {
           <Text style={styles.locationWhite}>{params.location}</Text>
         </View>
       </View>
+
+      {/* Modal для полноэкранного просмотра фото */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={imageModalVisible}
+        onRequestClose={() => setImageModalVisible(false)}
+        statusBarTranslucent={true}
+      >
+        <View style={styles.modalContainer}>
+          <StatusBar hidden />
+          <Image 
+            source={{ uri: params.image }} 
+            style={styles.fullImage} 
+            resizeMode="contain"
+          />
+          <TouchableOpacity 
+            style={styles.closeButton}
+            onPress={() => setImageModalVisible(false)}
+          >
+            <X size={24} color={COLORS.white} />
+          </TouchableOpacity>
+        </View>
+      </Modal>
 
       <PanGestureHandler
         onGestureEvent={onGestureEvent}
@@ -188,14 +216,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     width: '100%',
-    height: '100%',
+    height: '75%',
+    resizeMode: 'cover',
   },
   overlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    height: '100%',
+    height: '75%',
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
   header: {
@@ -239,7 +268,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  favoriteButton: {
+  searchButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -335,5 +364,33 @@ const styles = StyleSheet.create({
   },
   bookButton: {
     height: 56,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#000',
+    width: '100%',
+    height: '100%',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  fullImage: {
+    width: width,
+    height: height,
+    flex: 1,
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 50,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 10,
   },
 }); 
