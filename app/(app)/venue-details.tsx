@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Animated, StatusBar } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { ArrowLeft, MapPin, Heart } from 'lucide-react-native';
 import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../utils/theme';
@@ -103,6 +103,8 @@ export default function VenueDetailsScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+      
       <Image 
         source={{ uri: params.image }} 
         style={styles.backgroundImage} 

@@ -200,12 +200,14 @@ const styles = StyleSheet.create({
   },
   categoriesWrapper: {
     marginVertical: SPACING.md,
+    paddingBottom: SPACING.xs,
   },
   categoriesContainer: {
-    maxHeight: 50,
+    maxHeight: 56,
   },
   categoriesContent: {
     paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.sm,
   },
   categoryButton: {
     paddingHorizontal: SPACING.md,
@@ -214,7 +216,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
     backgroundColor: COLORS.white,
     ...SHADOWS.small,
-    height: 40,
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
