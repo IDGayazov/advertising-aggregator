@@ -5,7 +5,7 @@ export const COLORS = {
   text: '#323232',
   textLight: '#666666',
   white: '#FFFFFF',
-  background: '#FAFAFA',
+  background: '#f8f5e6', // светло-кремовый, тусклый желтоватый
   card: '#FFFFFF',
   border: '#EEEEEE',
   error: '#FF5252',

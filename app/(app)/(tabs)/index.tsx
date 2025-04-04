@@ -182,7 +182,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: COLORS.background,
+    backgroundColor: 'rgba(248, 245, 230, 0.7)',
     borderRadius: LAYOUT.borderRadius.medium,
     padding: SPACING.sm,
     marginBottom: SPACING.sm,
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     marginVertical: SPACING.md,
   },
   categoriesContainer: {
-    maxHeight: 44,
+    maxHeight: 50,
   },
   categoriesContent: {
     paddingHorizontal: SPACING.lg,
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
     backgroundColor: COLORS.white,
     ...SHADOWS.small,
-    height: 36,
+    height: 40,
     alignItems: 'center',
     justifyContent: 'center',
   },
