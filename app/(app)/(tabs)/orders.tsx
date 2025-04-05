@@ -138,13 +138,13 @@ export default function OrdersScreen() {
                 <Text style={styles.cardPrice}>{order.price}</Text>
               </View>
               
-              <TouchableOpacity 
+              {/* <TouchableOpacity 
                 style={styles.detailsButton}
                 onPress={() => router.push(`/venue-details?id=${order.venueId}`)}
               >
                 <Text style={styles.detailsButtonText}>Подробнее</Text>
                 <ChevronRight size={16} color={COLORS.primary} />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </Animated.View>
           ))
         )}
