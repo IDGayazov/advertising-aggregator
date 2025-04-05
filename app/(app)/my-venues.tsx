@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Plus, Calendar } from 'lucide-react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
+import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../utils/theme';
 
 // Используем те же данные площадок, что и раньше
 const MY_VENUES = [
@@ -30,63 +31,82 @@ export default function MyVenuesScreen() {
 
   return (
     <View style={styles.container}>
+      <StatusBar backgroundColor={COLORS.white} barStyle="dark-content" />
       <View style={styles.header}>
         <TouchableOpacity 
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <ArrowLeft size={24} color="#333" />
+          <ArrowLeft size={24} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.title}>Мои площадки</Text>
-        <TouchableOpacity style={styles.addButton}>
-          <Plus size={24} color="#6E88F5" />
+        <TouchableOpacity 
+          style={styles.addButton}
+          onPress={() => router.push('/create')}
+        >
+          <Plus size={24} color={COLORS.primary} />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
-        {MY_VENUES.map((venue, index) => (
-          <Animated.View
-            key={venue.id}
-            entering={FadeInRight.delay(index * 100)}
-            style={styles.card}
-          >
-            <Image 
-              source={{ uri: venue.image }}
-              style={styles.venueImage}
-              resizeMode="cover"
-            />
-            <View style={styles.cardContent}>
-              <View style={styles.cardHeader}>
-                <Text style={styles.venueTitle}>{venue.title}</Text>
-                <View style={[
-                  styles.statusBadge,
-                  { backgroundColor: venue.status === 'active' ? '#4ECDC4' : '#F5A623' }
-                ]}>
-                  <Text style={styles.statusText}>
-                    {venue.status === 'active' ? 'Активно' : 'На модерации'}
-                  </Text>
+      <ScrollView 
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        {MY_VENUES.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyStateText}>У вас пока нет площадок</Text>
+            <TouchableOpacity 
+              style={styles.createButton}
+              onPress={() => router.push('/create')}
+            >
+              <Text style={styles.createButtonText}>Создать площадку</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          MY_VENUES.map((venue, index) => (
+            <Animated.View
+              key={venue.id}
+              entering={FadeInRight.delay(index * 100)}
+              style={styles.card}
+            >
+              <Image 
+                source={{ uri: venue.image }}
+                style={styles.venueImage}
+                resizeMode="cover"
+              />
+              <View style={styles.cardContent}>
+                <View style={styles.cardHeader}>
+                  <Text style={styles.venueTitle}>{venue.title}</Text>
+                  <View style={[
+                    styles.statusBadge,
+                    { backgroundColor: venue.status === 'active' ? COLORS.success : COLORS.primaryLight }
+                  ]}>
+                    <Text style={styles.statusText}>
+                      {venue.status === 'active' ? 'Активно' : 'На модерации'}
+                    </Text>
+                  </View>
                 </View>
+                <Text style={styles.venueLocation}>{venue.location}</Text>
+                
+                {venue.startDate && venue.endDate && (
+                  <View style={styles.dateContainer}>
+                    <Calendar size={16} color={COLORS.textLight} />
+                    <Text style={styles.dateText}>
+                      {formatDate(venue.startDate)} - {formatDate(venue.endDate)}
+                    </Text>
+                  </View>
+                )}
+                
+                <TouchableOpacity 
+                  style={styles.editButton}
+                  onPress={() => router.push(`/venue-details?id=${venue.id}`)}
+                >
+                  <Text style={styles.editButtonText}>Редактировать</Text>
+                </TouchableOpacity>
               </View>
-              <Text style={styles.venueLocation}>{venue.location}</Text>
-              
-              {venue.startDate && venue.endDate && (
-                <View style={styles.dateContainer}>
-                  <Calendar size={16} color="#666" />
-                  <Text style={styles.dateText}>
-                    {formatDate(venue.startDate)} - {formatDate(venue.endDate)}
-                  </Text>
-                </View>
-              )}
-              
-              <TouchableOpacity 
-                style={styles.editButton}
-                onPress={() => router.push(`/venue-details?id=${venue.id}`)}
-              >
-                <Text style={styles.editButtonText}>Редактировать</Text>
-              </TouchableOpacity>
-            </View>
-          </Animated.View>
-        ))}
+            </Animated.View>
+          ))
+        )}
       </ScrollView>
     </View>
   );
@@ -95,100 +115,134 @@ export default function MyVenuesScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFF',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFF',
-    padding: 20,
+    backgroundColor: COLORS.white,
+    padding: SPACING.lg,
     paddingTop: 60,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: COLORS.border,
+    ...SHADOWS.small,
   },
   backButton: {
-    padding: 8,
+    padding: SPACING.sm,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontFamily: 'Manrope-Bold',
     fontSize: 20,
-    color: '#333',
+    color: COLORS.text,
   },
   addButton: {
-    padding: 8,
+    padding: SPACING.sm,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: COLORS.background,
+    ...SHADOWS.small,
   },
   content: {
-    padding: 20,
+    padding: SPACING.lg,
+  },
+  emptyState: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: SPACING.xxl,
+  },
+  emptyStateText: {
+    fontFamily: 'Manrope-Medium',
+    fontSize: 16,
+    color: COLORS.textLight,
+    marginBottom: SPACING.lg,
+  },
+  createButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: LAYOUT.borderRadius.medium,
+    ...SHADOWS.small,
+  },
+  createButtonText: {
+    fontFamily: 'Manrope-Bold',
+    fontSize: 16,
+    color: COLORS.white,
   },
   card: {
-    backgroundColor: '#FFF',
-    borderRadius: 16,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+    backgroundColor: COLORS.white,
+    borderRadius: LAYOUT.borderRadius.large,
+    marginBottom: SPACING.lg,
+    ...SHADOWS.small,
   },
   venueImage: {
     height: 160,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
+    borderTopLeftRadius: LAYOUT.borderRadius.large,
+    borderTopRightRadius: LAYOUT.borderRadius.large,
     width: '100%',
   },
   cardContent: {
-    padding: 16,
+    padding: SPACING.md,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: SPACING.sm,
   },
   venueTitle: {
     fontFamily: 'Manrope-Bold',
     fontSize: 18,
-    color: '#333',
+    color: COLORS.text,
     flex: 1,
-    marginRight: 10,
+    marginRight: SPACING.sm,
   },
   statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
+    borderRadius: LAYOUT.borderRadius.circle,
   },
   statusText: {
     fontFamily: 'Manrope-Medium',
     fontSize: 12,
-    color: '#FFF',
+    color: COLORS.white,
   },
   venueLocation: {
     fontFamily: 'Manrope-Regular',
     fontSize: 14,
-    color: '#666',
-    marginBottom: 12,
+    color: COLORS.textLight,
+    marginBottom: SPACING.sm,
   },
   dateContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: SPACING.sm,
   },
   dateText: {
     fontFamily: 'Manrope-Regular',
     fontSize: 14,
-    color: '#666',
-    marginLeft: 8,
+    color: COLORS.textLight,
+    marginLeft: SPACING.sm,
   },
   editButton: {
-    backgroundColor: '#F0F4FF',
-    padding: 12,
-    borderRadius: 12,
+    backgroundColor: COLORS.background,
+    padding: SPACING.sm,
+    borderRadius: LAYOUT.borderRadius.medium,
     alignItems: 'center',
+    marginTop: SPACING.xs,
+    ...SHADOWS.small,
   },
   editButtonText: {
     fontFamily: 'Manrope-Bold',
     fontSize: 14,
-    color: '#6E88F5',
+    color: COLORS.primary,
   },
 }); 

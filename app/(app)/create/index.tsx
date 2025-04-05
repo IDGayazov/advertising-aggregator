@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, StatusBar } from 'react-native';
 import { Image, MapPin, DollarSign, Calendar } from 'lucide-react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
+import { COLORS, SPACING, LAYOUT, SHADOWS, TYPOGRAPHY } from '../../../utils/theme';
 
 const TYPES = ['Билборд', 'Лифт', 'Автобус', 'Мероприятие'];
 
@@ -49,7 +50,7 @@ export default function CreateAdSpaceScreen() {
               <TextInput
                 style={styles.input}
                 placeholder="Например: Билборд на Невском"
-                placeholderTextColor="#999"
+                placeholderTextColor={COLORS.textLight}
               />
             </View>
             <View style={styles.inputContainer}>
@@ -57,7 +58,7 @@ export default function CreateAdSpaceScreen() {
               <TextInput
                 style={[styles.input, styles.textArea]}
                 placeholder="Опишите вашу рекламную площадку"
-                placeholderTextColor="#999"
+                placeholderTextColor={COLORS.textLight}
                 multiline
                 numberOfLines={4}
               />
@@ -69,7 +70,7 @@ export default function CreateAdSpaceScreen() {
           <View style={styles.stepContainer}>
             <Text style={styles.stepTitle}>Медиафайлы</Text>
             <TouchableOpacity style={styles.uploadButton}>
-              <Image size={24} color="#6E88F5" />
+              <Image size={24} color={COLORS.primary} />
               <Text style={styles.uploadButtonText}>Добавить фото</Text>
             </TouchableOpacity>
           </View>
@@ -81,22 +82,22 @@ export default function CreateAdSpaceScreen() {
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Адрес</Text>
               <View style={styles.inputWithIcon}>
-                <MapPin size={20} color="#666" style={styles.inputIcon} />
+                <MapPin size={20} color={COLORS.textLight} style={styles.inputIcon} />
                 <TextInput
                   style={styles.inputWithIconField}
                   placeholder="Введите адрес"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={COLORS.textLight}
                 />
               </View>
             </View>
             <View style={styles.inputContainer}>
               <Text style={styles.label}>Стоимость в месяц</Text>
               <View style={styles.inputWithIcon}>
-                <DollarSign size={20} color="#666" style={styles.inputIcon} />
+                <DollarSign size={20} color={COLORS.textLight} style={styles.inputIcon} />
                 <TextInput
                   style={styles.inputWithIconField}
                   placeholder="Введите стоимость"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={COLORS.textLight}
                   keyboardType="numeric"
                 />
               </View>
@@ -108,11 +109,11 @@ export default function CreateAdSpaceScreen() {
                 <View style={styles.dateInputContainer}>
                   <Text style={styles.dateLabel}>С</Text>
                   <View style={styles.inputWithIcon}>
-                    <Calendar size={20} color="#666" style={styles.inputIcon} />
+                    <Calendar size={20} color={COLORS.textLight} style={styles.inputIcon} />
                     <TextInput
                       style={styles.inputWithIconField}
                       placeholder="дд.мм.гггг"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={COLORS.textLight}
                       value={startDate}
                       onChangeText={setStartDate}
                     />
@@ -122,11 +123,11 @@ export default function CreateAdSpaceScreen() {
                 <View style={styles.dateInputContainer}>
                   <Text style={styles.dateLabel}>По</Text>
                   <View style={styles.inputWithIcon}>
-                    <Calendar size={20} color="#666" style={styles.inputIcon} />
+                    <Calendar size={20} color={COLORS.textLight} style={styles.inputIcon} />
                     <TextInput
                       style={styles.inputWithIconField}
                       placeholder="дд.мм.гггг"
-                      placeholderTextColor="#999"
+                      placeholderTextColor={COLORS.textLight}
                       value={endDate}
                       onChangeText={setEndDate}
                     />
@@ -143,7 +144,11 @@ export default function CreateAdSpaceScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.content}>
+      <StatusBar backgroundColor={COLORS.background} barStyle="dark-content" />
+      <ScrollView 
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.progressContainer}>
           {[1, 2, 3, 4].map((step) => (
             <View
@@ -195,40 +200,41 @@ export default function CreateAdSpaceScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFF',
+    backgroundColor: COLORS.background,
   },
   content: {
     flex: 1,
-    padding: 20,
+    padding: SPACING.lg,
   },
   progressContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 30,
+    marginBottom: SPACING.xl,
   },
   progressStep: {
     width: 70,
     height: 4,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: COLORS.border,
     borderRadius: 2,
   },
   progressStepActive: {
-    backgroundColor: '#6E88F5',
+    backgroundColor: COLORS.primary,
   },
   stepContent: {
     flex: 1,
   },
   stepContainer: {
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-    padding: 20,
-    marginBottom: 20,
+    backgroundColor: COLORS.white,
+    borderRadius: LAYOUT.borderRadius.large,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    ...SHADOWS.small,
   },
   stepTitle: {
     fontFamily: 'Manrope-Bold',
     fontSize: 20,
-    color: '#333',
-    marginBottom: 20,
+    color: COLORS.text,
+    marginBottom: SPACING.lg,
   },
   typeContainer: {
     flexDirection: 'row',
@@ -236,114 +242,124 @@ const styles = StyleSheet.create({
     marginHorizontal: -5,
   },
   typeButton: {
-    backgroundColor: '#F9FAFF',
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
+    backgroundColor: COLORS.background,
+    borderRadius: LAYOUT.borderRadius.medium,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
     margin: 5,
+    ...SHADOWS.small,
   },
   typeButtonActive: {
-    backgroundColor: '#6E88F5',
+    backgroundColor: COLORS.primary,
   },
   typeButtonText: {
     fontFamily: 'Manrope-Bold',
     fontSize: 14,
-    color: '#666',
+    color: COLORS.text,
   },
   typeButtonTextActive: {
-    color: '#FFF',
+    color: COLORS.white,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   label: {
-    fontFamily: 'Manrope-Regular',
+    fontFamily: 'Manrope-Medium',
     fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    color: COLORS.textLight,
+    marginBottom: SPACING.sm,
   },
   input: {
-    backgroundColor: '#F9FAFF',
-    borderRadius: 12,
-    padding: 15,
+    backgroundColor: COLORS.background,
+    borderRadius: LAYOUT.borderRadius.medium,
+    padding: SPACING.md,
     fontFamily: 'Manrope-Regular',
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text,
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.small,
   },
   textArea: {
     height: 120,
     textAlignVertical: 'top',
   },
   uploadButton: {
-    backgroundColor: '#F9FAFF',
-    borderRadius: 12,
-    padding: 20,
+    backgroundColor: COLORS.background,
+    borderRadius: LAYOUT.borderRadius.medium,
+    padding: SPACING.lg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#6E88F5',
+    borderColor: COLORS.primary,
     borderStyle: 'dashed',
+    ...SHADOWS.small,
   },
   uploadButtonText: {
-    color: '#6E88F5',
+    color: COLORS.primary,
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
-    marginLeft: 10,
+    marginLeft: SPACING.sm,
   },
   inputWithIcon: {
-    backgroundColor: '#F9FAFF',
-    borderRadius: 12,
-    paddingHorizontal: 15,
+    backgroundColor: COLORS.background,
+    borderRadius: LAYOUT.borderRadius.medium,
+    paddingHorizontal: SPACING.md,
     flexDirection: 'row',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.small,
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: SPACING.sm,
   },
   inputWithIconField: {
     flex: 1,
-    padding: 15,
+    padding: SPACING.md,
     fontFamily: 'Manrope-Regular',
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text,
   },
   footer: {
-    backgroundColor: '#FFF',
-    padding: 20,
-    paddingBottom: 30,
+    backgroundColor: COLORS.white,
+    padding: SPACING.lg,
+    paddingBottom: SPACING.xl,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     borderTopWidth: 1,
-    borderTopColor: '#F0F0F0',
+    borderTopColor: COLORS.border,
+    ...SHADOWS.small,
   },
   backButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 12,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    borderRadius: LAYOUT.borderRadius.medium,
     borderWidth: 1,
-    borderColor: '#6E88F5',
+    borderColor: COLORS.primary,
   },
   backButtonText: {
-    color: '#6E88F5',
+    color: COLORS.primary,
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
   },
   nextButton: {
-    backgroundColor: '#6E88F5',
-    paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 12,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.xl,
+    borderRadius: LAYOUT.borderRadius.medium,
     flex: 1,
-    marginLeft: 10,
+    marginLeft: SPACING.sm,
     alignItems: 'center',
+    ...SHADOWS.small,
   },
   submitButton: {
-    backgroundColor: '#4ECDC4',
+    backgroundColor: COLORS.success,
   },
   nextButtonText: {
-    color: '#FFF',
+    color: COLORS.white,
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
   },
@@ -358,7 +374,7 @@ const styles = StyleSheet.create({
   dateLabel: {
     fontFamily: 'Manrope-Regular',
     fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    color: COLORS.textLight,
+    marginBottom: SPACING.sm,
   },
 });

@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, TextInput,
 import { useRouter } from 'expo-router';
 import { ArrowLeft, Camera, Mail, Phone, User } from 'lucide-react-native';
 import * as ImagePicker from 'expo-image-picker';
+import { COLORS, SPACING, LAYOUT, SHADOWS, TYPOGRAPHY } from '../../utils/theme';
 
 export default function ProfileSettingsScreen() {
   const router = useRouter();
@@ -106,7 +107,7 @@ export default function ProfileSettingsScreen() {
           style={styles.backButton}
           onPress={() => router.back()}
         >
-          <ArrowLeft size={24} color="#333" />
+          <ArrowLeft size={24} color={COLORS.text} />
         </TouchableOpacity>
         <Text style={styles.title}>Редактировать профиль</Text>
         <TouchableOpacity style={styles.saveButton}>
@@ -114,7 +115,10 @@ export default function ProfileSettingsScreen() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.avatarContainer}>
           <Image
             source={{ uri: userData.avatar }}
@@ -124,19 +128,20 @@ export default function ProfileSettingsScreen() {
             style={styles.changeAvatarButton}
             onPress={showImagePickerOptions}
           >
-            <Camera size={20} color="#FFF" />
+            <Camera size={20} color={COLORS.white} />
           </TouchableOpacity>
         </View>
 
         <View style={styles.formGroup}>
           <Text style={styles.label}>Имя</Text>
           <View style={styles.inputContainer}>
-            <User size={20} color="#666" />
+            <User size={20} color={COLORS.textLight} />
             <TextInput
               style={styles.input}
               value={userData.name}
               onChangeText={(text) => setUserData({...userData, name: text})}
               placeholder="Введите ваше имя"
+              placeholderTextColor={COLORS.textLight}
             />
           </View>
         </View>
@@ -144,13 +149,14 @@ export default function ProfileSettingsScreen() {
         <View style={styles.formGroup}>
           <Text style={styles.label}>Email</Text>
           <View style={styles.inputContainer}>
-            <Mail size={20} color="#666" />
+            <Mail size={20} color={COLORS.textLight} />
             <TextInput
               style={styles.input}
               value={userData.email}
               onChangeText={(text) => setUserData({...userData, email: text})}
               placeholder="Введите ваш email"
               keyboardType="email-address"
+              placeholderTextColor={COLORS.textLight}
             />
           </View>
         </View>
@@ -158,16 +164,21 @@ export default function ProfileSettingsScreen() {
         <View style={styles.formGroup}>
           <Text style={styles.label}>Телефон</Text>
           <View style={styles.inputContainer}>
-            <Phone size={20} color="#666" />
+            <Phone size={20} color={COLORS.textLight} />
             <TextInput
               style={styles.input}
               value={userData.phone}
               onChangeText={(text) => setUserData({...userData, phone: text})}
               placeholder="Введите ваш телефон"
               keyboardType="phone-pad"
+              placeholderTextColor={COLORS.textLight}
             />
           </View>
         </View>
+        
+        <TouchableOpacity style={styles.saveButtonLarge}>
+          <Text style={styles.saveButtonLargeText}>Сохранить изменения</Text>
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -176,82 +187,105 @@ export default function ProfileSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFF',
+    backgroundColor: COLORS.background,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#FFF',
-    padding: 20,
+    backgroundColor: COLORS.white,
+    padding: SPACING.md,
     paddingTop: 60,
     borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomColor: COLORS.border,
+    ...SHADOWS.small,
   },
   backButton: {
-    padding: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontFamily: 'Manrope-Bold',
     fontSize: 20,
-    color: '#333',
+    color: COLORS.text,
   },
   saveButton: {
-    padding: 8,
+    padding: SPACING.sm,
   },
   saveButtonText: {
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
-    color: '#6E88F5',
+    color: COLORS.primary,
   },
   content: {
-    padding: 20,
+    padding: SPACING.lg,
   },
   avatarContainer: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginBottom: SPACING.xl,
     position: 'relative',
   },
   avatar: {
     width: 100,
     height: 100,
     borderRadius: 50,
+    borderWidth: 2,
+    borderColor: COLORS.primary,
   },
   changeAvatarButton: {
     position: 'absolute',
     right: '35%',
     bottom: 0,
-    backgroundColor: '#6E88F5',
+    backgroundColor: COLORS.primary,
     width: 36,
     height: 36,
     borderRadius: 18,
     justifyContent: 'center',
     alignItems: 'center',
+    ...SHADOWS.small,
   },
   formGroup: {
-    marginBottom: 20,
+    marginBottom: SPACING.lg,
   },
   label: {
     fontFamily: 'Manrope-Medium',
     fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+    color: COLORS.textLight,
+    marginBottom: SPACING.sm,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    backgroundColor: COLORS.white,
+    borderRadius: LAYOUT.borderRadius.medium,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.md,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: COLORS.border,
+    ...SHADOWS.small,
   },
   input: {
     flex: 1,
-    marginLeft: 12,
+    marginLeft: SPACING.sm,
     fontFamily: 'Manrope-Regular',
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text,
+  },
+  saveButtonLarge: {
+    backgroundColor: COLORS.primary,
+    borderRadius: LAYOUT.borderRadius.medium,
+    paddingVertical: SPACING.md,
+    alignItems: 'center',
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.xl,
+    ...SHADOWS.small,
+  },
+  saveButtonLargeText: {
+    fontFamily: 'Manrope-Bold',
+    fontSize: 16,
+    color: COLORS.white,
   },
 }); 

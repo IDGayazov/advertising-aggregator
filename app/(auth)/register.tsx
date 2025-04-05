@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, ScrollView, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Mail, Lock, Eye, EyeOff, User, ArrowLeft, Building2, MessageSquare } from 'lucide-react-native';
 import { validateEmail, validatePassword } from '../../utils/validation';
+import { COLORS, SPACING, LAYOUT, SHADOWS, TYPOGRAPHY } from '../../utils/theme';
 
 type UserRole = 'advertiser' | 'owner' | null;
 
@@ -78,336 +79,354 @@ export default function RegisterScreen() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <TouchableOpacity 
-        style={styles.backButton}
-        onPress={() => router.back()}
+    <>
+      <StatusBar backgroundColor={COLORS.background} barStyle="dark-content" />
+      <ScrollView 
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={false}
       >
-        <ArrowLeft size={24} color="#333" />
-      </TouchableOpacity>
-
-      <View style={styles.header}>
-        <Text style={styles.title}>Создание аккаунта</Text>
-        <Text style={styles.subtitle}>Заполните данные для регистрации</Text>
-      </View>
-
-      <View style={styles.form}>
-        {/* Выбор роли */}
-        <Text style={styles.roleTitle}>Выберите роль</Text>
-        <View style={styles.roleContainer}>
-          <TouchableOpacity 
-            style={[
-              styles.roleButton,
-              selectedRole === 'advertiser' && styles.roleButtonActive
-            ]}
-            onPress={() => setSelectedRole('advertiser')}
-          >
-            <MessageSquare 
-              size={24} 
-              color={selectedRole === 'advertiser' ? '#FFF' : '#6E88F5'} 
-            />
-            <Text style={[
-              styles.roleText,
-              selectedRole === 'advertiser' && styles.roleTextActive
-            ]}>
-              Рекламодатель
-            </Text>
-            <Text style={[
-              styles.roleDescription,
-              selectedRole === 'advertiser' && styles.roleDescriptionActive
-            ]}>
-              Размещайте рекламу
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={[
-              styles.roleButton,
-              selectedRole === 'owner' && styles.roleButtonActive
-            ]}
-            onPress={() => setSelectedRole('owner')}
-          >
-            <Building2 
-              size={24} 
-              color={selectedRole === 'owner' ? '#FFF' : '#6E88F5'} 
-            />
-            <Text style={[
-              styles.roleText,
-              selectedRole === 'owner' && styles.roleTextActive
-            ]}>
-              Владелец площадки
-            </Text>
-            <Text style={[
-              styles.roleDescription,
-              selectedRole === 'owner' && styles.roleDescriptionActive
-            ]}>
-              Сдавайте площадки
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Существующие поля формы */}
-        <View style={styles.inputGroup}>
-          <View style={[
-            styles.inputContainer,
-            touched.name && errors.name && styles.inputError
-          ]}>
-            <User size={20} color="#666" />
-            <TextInput
-              style={styles.input}
-              placeholder="Имя"
-              value={name}
-              onChangeText={setName}
-              onBlur={() => setTouched(prev => ({ ...prev, name: true }))}
-            />
-          </View>
-          {touched.name && errors.name && (
-            <Text style={styles.errorText}>{errors.name}</Text>
-          )}
-        </View>
-
-        <View style={styles.inputGroup}>
-          <View style={[
-            styles.inputContainer,
-            touched.email && errors.email && styles.inputError
-          ]}>
-            <Mail size={20} color="#666" />
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
-            />
-          </View>
-          {touched.email && errors.email && (
-            <Text style={styles.errorText}>{errors.email}</Text>
-          )}
-        </View>
-
-        <View style={styles.inputGroup}>
-          <View style={[
-            styles.inputContainer,
-            touched.password && errors.password && styles.inputError
-          ]}>
-            <Lock size={20} color="#666" />
-            <TextInput
-              style={styles.input}
-              placeholder="Пароль"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              onBlur={() => setTouched(prev => ({ ...prev, password: true }))}
-            />
-            <TouchableOpacity 
-              onPress={() => setShowPassword(!showPassword)}
-              style={styles.eyeButton}
-            >
-              {showPassword ? (
-                <EyeOff size={20} color="#666" />
-              ) : (
-                <Eye size={20} color="#666" />
-              )}
-            </TouchableOpacity>
-          </View>
-          {touched.password && errors.password && (
-            <Text style={styles.errorText}>{errors.password}</Text>
-          )}
-        </View>
-
-        <View style={styles.inputGroup}>
-          <View style={[
-            styles.inputContainer,
-            touched.confirmPassword && errors.confirmPassword && styles.inputError
-          ]}>
-            <Lock size={20} color="#666" />
-            <TextInput
-              style={styles.input}
-              placeholder="Подтвердите пароль"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry={!showConfirmPassword}
-              autoCapitalize="none"
-              onBlur={() => setTouched(prev => ({ ...prev, confirmPassword: true }))}
-            />
-            <TouchableOpacity 
-              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-              style={styles.eyeButton}
-            >
-              {showConfirmPassword ? (
-                <EyeOff size={20} color="#666" />
-              ) : (
-                <Eye size={20} color="#666" />
-              )}
-            </TouchableOpacity>
-          </View>
-          {touched.confirmPassword && errors.confirmPassword && (
-            <Text style={styles.errorText}>{errors.confirmPassword}</Text>
-          )}
-        </View>
-
         <TouchableOpacity 
-          style={[
-            styles.registerButton,
-            (!name || !email || !password || !confirmPassword || !selectedRole) && 
-            styles.registerButtonDisabled
-          ]}
-          onPress={handleRegister}
-          disabled={!name || !email || !password || !confirmPassword || !selectedRole}
+          style={styles.backButton}
+          onPress={() => router.back()}
         >
-          <Text style={styles.registerButtonText}>Зарегистрироваться</Text>
+          <ArrowLeft size={24} color={COLORS.text} />
         </TouchableOpacity>
 
-        <View style={styles.loginContainer}>
-          <Text style={styles.loginText}>Уже есть аккаунт? </Text>
-          <TouchableOpacity onPress={() => router.push('/(auth)/login')}>
-            <Text style={styles.loginLink}>Войти</Text>
-          </TouchableOpacity>
+        <View style={styles.header}>
+          <Text style={styles.title}>Создание аккаунта</Text>
+          <Text style={styles.subtitle}>Заполните данные для регистрации</Text>
         </View>
-      </View>
-    </ScrollView>
+
+        <View style={styles.form}>
+          {/* Выбор роли */}
+          <Text style={styles.roleTitle}>Выберите роль</Text>
+          <View style={styles.roleContainer}>
+            <TouchableOpacity 
+              style={[
+                styles.roleButton,
+                selectedRole === 'advertiser' && styles.roleButtonActive
+              ]}
+              onPress={() => setSelectedRole('advertiser')}
+            >
+              <MessageSquare 
+                size={24} 
+                color={selectedRole === 'advertiser' ? COLORS.white : COLORS.primary} 
+              />
+              <Text style={[
+                styles.roleText,
+                selectedRole === 'advertiser' && styles.roleTextActive
+              ]}>
+                Рекламодатель
+              </Text>
+              <Text style={[
+                styles.roleDescription,
+                selectedRole === 'advertiser' && styles.roleDescriptionActive
+              ]}>
+                Размещайте рекламу
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[
+                styles.roleButton,
+                selectedRole === 'owner' && styles.roleButtonActive
+              ]}
+              onPress={() => setSelectedRole('owner')}
+            >
+              <Building2 
+                size={24} 
+                color={selectedRole === 'owner' ? COLORS.white : COLORS.primary} 
+              />
+              <Text style={[
+                styles.roleText,
+                selectedRole === 'owner' && styles.roleTextActive
+              ]}>
+                Владелец площадки
+              </Text>
+              <Text style={[
+                styles.roleDescription,
+                selectedRole === 'owner' && styles.roleDescriptionActive
+              ]}>
+                Сдавайте площадки
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Поля формы */}
+          <View style={styles.inputGroup}>
+            <View style={[
+              styles.inputContainer,
+              touched.name && errors.name && styles.inputError
+            ]}>
+              <User size={20} color={COLORS.textLight} />
+              <TextInput
+                style={styles.input}
+                placeholder="Имя"
+                value={name}
+                onChangeText={setName}
+                onBlur={() => setTouched(prev => ({ ...prev, name: true }))}
+                placeholderTextColor={COLORS.textLight}
+              />
+            </View>
+            {touched.name && errors.name && (
+              <Text style={styles.errorText}>{errors.name}</Text>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <View style={[
+              styles.inputContainer,
+              touched.email && errors.email && styles.inputError
+            ]}>
+              <Mail size={20} color={COLORS.textLight} />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                onBlur={() => setTouched(prev => ({ ...prev, email: true }))}
+                placeholderTextColor={COLORS.textLight}
+              />
+            </View>
+            {touched.email && errors.email && (
+              <Text style={styles.errorText}>{errors.email}</Text>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <View style={[
+              styles.inputContainer,
+              touched.password && errors.password && styles.inputError
+            ]}>
+              <Lock size={20} color={COLORS.textLight} />
+              <TextInput
+                style={styles.input}
+                placeholder="Пароль"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                onBlur={() => setTouched(prev => ({ ...prev, password: true }))}
+                placeholderTextColor={COLORS.textLight}
+              />
+              <TouchableOpacity 
+                onPress={() => setShowPassword(!showPassword)}
+                style={styles.eyeButton}
+              >
+                {showPassword ? (
+                  <EyeOff size={20} color={COLORS.textLight} />
+                ) : (
+                  <Eye size={20} color={COLORS.textLight} />
+                )}
+              </TouchableOpacity>
+            </View>
+            {touched.password && errors.password && (
+              <Text style={styles.errorText}>{errors.password}</Text>
+            )}
+          </View>
+
+          <View style={styles.inputGroup}>
+            <View style={[
+              styles.inputContainer,
+              touched.confirmPassword && errors.confirmPassword && styles.inputError
+            ]}>
+              <Lock size={20} color={COLORS.textLight} />
+              <TextInput
+                style={styles.input}
+                placeholder="Подтвердите пароль"
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+                autoCapitalize="none"
+                onBlur={() => setTouched(prev => ({ ...prev, confirmPassword: true }))}
+                placeholderTextColor={COLORS.textLight}
+              />
+              <TouchableOpacity 
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={styles.eyeButton}
+              >
+                {showConfirmPassword ? (
+                  <EyeOff size={20} color={COLORS.textLight} />
+                ) : (
+                  <Eye size={20} color={COLORS.textLight} />
+                )}
+              </TouchableOpacity>
+            </View>
+            {touched.confirmPassword && errors.confirmPassword && (
+              <Text style={styles.errorText}>{errors.confirmPassword}</Text>
+            )}
+          </View>
+
+          <TouchableOpacity 
+            style={[
+              styles.registerButton,
+              (!selectedRole || !name || !email || !password || !confirmPassword) && styles.registerButtonDisabled
+            ]}
+            onPress={handleRegister}
+            disabled={!selectedRole || !name || !email || !password || !confirmPassword}
+          >
+            <Text style={styles.registerButtonText}>Зарегистрироваться</Text>
+          </TouchableOpacity>
+
+          <View style={styles.loginContainer}>
+            <Text style={styles.loginText}>Уже есть аккаунт? </Text>
+            <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
+              <Text style={styles.loginLink}>Войти</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </ScrollView>
+    </>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#F9FAFF',
-    padding: 20,
+    backgroundColor: COLORS.background,
+    padding: SPACING.lg,
+    paddingTop: 60,
   },
   backButton: {
-    marginTop: 60,
-    marginBottom: 20,
-    padding: 8,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: COLORS.white,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: SPACING.md,
+    ...SHADOWS.small,
   },
   header: {
-    marginBottom: 40,
+    marginBottom: SPACING.xl,
   },
   title: {
     fontFamily: 'Manrope-Bold',
-    fontSize: 32,
-    color: '#333',
-    marginBottom: 8,
+    fontSize: 28,
+    color: COLORS.text,
+    marginBottom: SPACING.xs,
   },
   subtitle: {
     fontFamily: 'Manrope-Regular',
     fontSize: 16,
-    color: '#666',
+    color: COLORS.textLight,
   },
   form: {
     width: '100%',
   },
+  roleTitle: {
+    fontFamily: 'Manrope-Bold',
+    fontSize: 16,
+    color: COLORS.text,
+    marginBottom: SPACING.md,
+  },
+  roleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: SPACING.xl,
+  },
+  roleButton: {
+    width: '48%',
+    backgroundColor: COLORS.white,
+    borderRadius: LAYOUT.borderRadius.medium,
+    padding: SPACING.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.border,
+    ...SHADOWS.small,
+  },
+  roleButtonActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+  roleText: {
+    fontFamily: 'Manrope-Bold',
+    fontSize: 14,
+    color: COLORS.text,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
+  },
+  roleTextActive: {
+    color: COLORS.white,
+  },
+  roleDescription: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 12,
+    color: COLORS.textLight,
+    textAlign: 'center',
+  },
+  roleDescriptionActive: {
+    color: COLORS.white,
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FFF',
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    marginBottom: 16,
+    backgroundColor: COLORS.white,
+    borderRadius: LAYOUT.borderRadius.medium,
+    paddingHorizontal: SPACING.md,
+    marginBottom: SPACING.sm,
     borderWidth: 1,
-    borderColor: '#E0E0E0',
+    borderColor: COLORS.border,
+    ...SHADOWS.small,
   },
   input: {
     flex: 1,
-    paddingVertical: 16,
-    marginLeft: 12,
+    paddingVertical: SPACING.md,
+    marginLeft: SPACING.sm,
     fontFamily: 'Manrope-Regular',
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text,
   },
   eyeButton: {
-    padding: 8,
+    padding: SPACING.sm,
   },
   registerButton: {
-    backgroundColor: '#6E88F5',
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: COLORS.primary,
+    paddingVertical: SPACING.md,
+    borderRadius: LAYOUT.borderRadius.medium,
     alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 24,
+    marginTop: SPACING.md,
+    marginBottom: SPACING.lg,
+    ...SHADOWS.small,
+  },
+  registerButtonDisabled: {
+    backgroundColor: COLORS.primaryLight,
+    opacity: 0.7,
   },
   registerButtonText: {
     fontFamily: 'Manrope-Bold',
     fontSize: 16,
-    color: '#FFF',
+    color: COLORS.white,
   },
   loginContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: SPACING.md,
   },
   loginText: {
     fontFamily: 'Manrope-Regular',
     fontSize: 14,
-    color: '#666',
+    color: COLORS.textLight,
   },
   loginLink: {
     fontFamily: 'Manrope-Bold',
     fontSize: 14,
-    color: '#6E88F5',
-  },
-  roleTitle: {
-    fontFamily: 'Manrope-Bold',
-    fontSize: 16,
-    color: '#333',
-    marginBottom: 12,
-  },
-  roleContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 24,
-  },
-  roleButton: {
-    flex: 1,
-    backgroundColor: '#F0F4FF',
-    borderRadius: 12,
-    padding: 16,
-    alignItems: 'center',
-    marginHorizontal: 6,
-    borderWidth: 2,
-    borderColor: 'transparent',
-  },
-  roleButtonActive: {
-    backgroundColor: '#6E88F5',
-    borderColor: '#6E88F5',
-  },
-  roleText: {
-    fontFamily: 'Manrope-Bold',
-    fontSize: 14,
-    color: '#6E88F5',
-    marginTop: 8,
-    marginBottom: 4,
-  },
-  roleTextActive: {
-    color: '#FFF',
-  },
-  roleDescription: {
-    fontFamily: 'Manrope-Regular',
-    fontSize: 12,
-    color: '#666',
-    textAlign: 'center',
-  },
-  roleDescriptionActive: {
-    color: '#FFF',
-  },
-  registerButtonDisabled: {
-    backgroundColor: '#A0A0A0',
-    opacity: 0.5,
+    color: COLORS.primary,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: SPACING.md,
   },
   inputError: {
-    borderColor: '#FF6B6B',
+    borderColor: COLORS.error,
   },
   errorText: {
     fontFamily: 'Manrope-Regular',
     fontSize: 12,
-    color: '#FF6B6B',
+    color: COLORS.error,
     marginTop: 4,
-    marginLeft: 16,
+    marginLeft: SPACING.md,
   },
 }); 

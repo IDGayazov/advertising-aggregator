@@ -179,10 +179,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.text,
     marginBottom: 4,
+    fontFamily: 'Manrope-Bold',
   },
   userRole: {
     fontSize: 14,
     color: COLORS.textLight,
+    fontFamily: 'Manrope-Regular',
   },
   settingsButton: {
     width: 40,
@@ -191,6 +193,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
+    ...SHADOWS.small,
   },
   content: {
     padding: SPACING.lg,
@@ -201,6 +204,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.text,
     marginBottom: SPACING.md,
+    fontFamily: 'Manrope-Bold',
   },
   menuItem: {
     flexDirection: 'row',
@@ -228,10 +232,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: COLORS.text,
     marginBottom: 2,
+    fontFamily: 'Manrope-SemiBold',
   },
   menuItemDescription: {
     fontSize: 14,
     color: COLORS.textLight,
+    fontFamily: 'Manrope-Regular',
   },
   divider: {
     height: 1,
@@ -252,14 +258,15 @@ const styles = StyleSheet.create({
     marginRight: SPACING.sm,
   },
   logoutText: {
+    fontFamily: 'Manrope-Medium',
     fontSize: 16,
-    fontWeight: '600',
     color: COLORS.error,
   },
   versionText: {
     textAlign: 'center',
-    fontSize: 14,
+    fontSize: 12,
     color: COLORS.textLight,
-    marginBottom: SPACING.xl,
+    marginBottom: SPACING.lg,
+    fontFamily: 'Manrope-Regular',
   },
 });
