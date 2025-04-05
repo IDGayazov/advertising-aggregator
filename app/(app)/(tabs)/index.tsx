@@ -126,9 +126,12 @@ export default function CatalogScreen() {
     // Фильтр по категории
     const matchesCategory = selectedCategory === 'Все' || venue.category === selectedCategory;
     
-    // Фильтр по поисковому запросу
-    const matchesSearch = venue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         venue.location.toLowerCase().includes(searchQuery.toLowerCase());
+    // Фильтр по поисковому запросу (название, адрес и категория)
+    const searchLower = searchQuery.toLowerCase();
+    const matchesSearch = 
+      venue.title.toLowerCase().includes(searchLower) ||
+      venue.location.toLowerCase().includes(searchLower) ||
+      venue.category.toLowerCase().includes(searchLower);
     
     // Фильтр по цене
     const matchesPrice = venue.price >= appliedFilters.priceMin && 
@@ -173,7 +176,7 @@ export default function CatalogScreen() {
           <Search size={20} color={COLORS.textLight} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
-            placeholder="Поиск площадок..."
+            placeholder="Поиск по адресу, категории..."
             placeholderTextColor={COLORS.textLight}
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -184,14 +187,18 @@ export default function CatalogScreen() {
           >
             {activeFiltersCount > 0 && (
               <View style={styles.filterBadge}>
-                {activeFiltersCount > 1 && (
-                  <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
-                )}
+                <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
               </View>
             )}
             <Sliders size={20} color={COLORS.primary} />
           </TouchableOpacity>
         </View>
+
+        {searchQuery.length > 0 && filteredVenues.length === 0 && (
+          <Text style={styles.noResultsText}>
+            По вашему запросу ничего не найдено
+          </Text>
+        )}
       </View>
 
       {/* Модальное окно фильтров */}
@@ -290,7 +297,7 @@ export default function CatalogScreen() {
       </Modal>
 
       <View style={styles.categoriesWrapper}>
-        <ScrollView 
+        <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.categoriesContainer}
@@ -390,6 +397,8 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 16,
     color: COLORS.text,
+    fontFamily: 'Manrope-Regular',
+    paddingVertical: 8,
   },
   filterButton: {
     padding: SPACING.xs,
@@ -574,5 +583,12 @@ const styles = StyleSheet.create({
     color: COLORS.white,
     fontWeight: '600',
     fontSize: 16,
+  },
+  noResultsText: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 14,
+    color: COLORS.textLight,
+    textAlign: 'center',
+    marginTop: SPACING.sm,
   },
 });
