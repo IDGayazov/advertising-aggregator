@@ -1,7 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image } from 'react-native';
-import { Search, FileSliders as Sliders } from 'lucide-react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, Platform } from 'react-native';
+import { Search, Sliders, MapPin, X, Calendar, DollarSign } from 'lucide-react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
+import { useRouter } from 'expo-router';
+import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../../utils/theme';
+import Card from '../../../components/Card';
 
 const CATEGORIES = ['Все', 'Билборды', 'Лифты', 'Автобусы', 'Мероприятия'];
 
@@ -14,6 +17,8 @@ interface Venue {
   price: number;
   category: string;
   image: string;
+  startDate: string;
+  endDate: string;
 }
 
 // Пример данных (в реальном приложении это может приходить с API)
@@ -25,7 +30,9 @@ const VENUES: Venue[] = [
     description: '6x3 м, двусторонний, светодиодный',
     price: 45000,
     category: 'Билборды',
-    image: 'https://media.istockphoto.com/id/994853998/ru/%D1%84%D0%BE%D1%82%D0%BE/%D0%B4%D0%BE%D0%BC-%D0%BF%D0%B5%D0%B2%D0%B8%D1%86%D1%8B-%D0%BD%D0%B0-%D0%BD%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%BC-%D0%BF%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%D0%B5.jpg?s=612x612&w=0&k=20&c=r-yhxP8XqeToGao0tZeW7I9KLHOxzSxcw7hFj3XlRSA='
+    image: 'https://media.istockphoto.com/id/994853998/ru/%D1%84%D0%BE%D1%82%D0%BE/%D0%B4%D0%BE%D0%BC-%D0%BF%D0%B5%D0%B2%D0%B8%D1%86%D1%8B-%D0%BD%D0%B0-%D0%BD%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%BC-%D0%BF%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%D0%B5.jpg?s=612x612&w=0&k=20&c=r-yhxP8XqeToGao0tZeW7I9KLHOxzSxcw7hFj3XlRSA=',
+    startDate: '2023-05-01',
+    endDate: '2023-07-31'
   },
   {
     id: 2,
@@ -34,7 +41,9 @@ const VENUES: Venue[] = [
     description: 'плакат',
     price: 45000,
     category: 'Лифты',
-    image: 'https://media-cdn.tripadvisor.com/media/photo-s/0c/7f/e4/1a/caption.jpg'
+    image: 'https://media-cdn.tripadvisor.com/media/photo-s/0c/7f/e4/1a/caption.jpg',
+    startDate: '2023-05-15',
+    endDate: '2023-08-15'
   },
   {
     id: 3,
@@ -43,45 +52,251 @@ const VENUES: Venue[] = [
     description: 'вывеска',
     price: 45000,
     category: 'Автобусы',
-    image: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/%D0%9A%D0%B0%D0%B7%D0%B0%D0%BD%D1%8C%2C_%D0%B0%D0%B2%D1%82%D0%BE%D0%B1%D1%83%D1%81_47-%D0%B3%D0%BE_%D0%BC%D0%B0%D1%80%D1%88%D1%80%D1%83%D1%82%D0%B0_%D0%BD%D0%B0_%D1%83%D0%BB%D0%B8%D1%86%D0%B5_%D0%90%D0%BA%D0%B0%D0%B4%D0%B5%D0%BC%D0%B8%D0%BA%D0%B0_%D0%9F%D0%B0%D1%80%D0%B8%D0%BD%D0%B0.jpg'
+    image: 'https://upload.wikimedia.org/wikipedia/commons/a/a8/%D0%9A%D0%B0%D0%B7%D0%B0%D0%BD%D1%8C%2C_%D0%B0%D0%B2%D1%82%D0%BE%D0%B1%D1%83%D1%81_47-%D0%B3%D0%BE_%D0%BC%D0%B0%D1%80%D1%88%D1%80%D1%83%D1%82%D0%B0_%D0%BD%D0%B0_%D1%83%D0%BB%D0%B8%D1%86%D0%B5_%D0%90%D0%BA%D0%B0%D0%B4%D0%B5%D0%BC%D0%B8%D0%BA%D0%B0_%D0%9F%D0%B0%D1%80%D0%B8%D0%BD%D0%B0.jpg',
+    startDate: '2023-06-01',
+    endDate: '2023-09-30'
   },
 ];
 
 export default function CatalogScreen() {
   const [selectedCategory, setSelectedCategory] = React.useState('Все');
   const [searchQuery, setSearchQuery] = React.useState('');
+  const [showFilters, setShowFilters] = React.useState(false);
+  const [priceMin, setPriceMin] = React.useState('');
+  const [priceMax, setPriceMax] = React.useState('');
+  const [dateFrom, setDateFrom] = React.useState('');
+  const [dateTo, setDateTo] = React.useState('');
+  const [appliedFilters, setAppliedFilters] = React.useState({
+    priceMin: 0,
+    priceMax: Infinity,
+    dateFrom: '',
+    dateTo: ''
+  });
+  const router = useRouter();
 
-  // Фильтрация площадок по категории и поисковому запросу
+  // Форматируем дату в строку ISO для сравнения
+  const formatDateForCompare = (dateString: string) => {
+    if (!dateString) return '';
+    // Предполагаем, что пользователь вводит в формате дд.мм.гггг
+    const [day, month, year] = dateString.split('.');
+    if (!day || !month || !year) return '';
+    return `${year}-${month}-${day}`;
+  };
+
+  // Функция применения фильтров
+  const applyFilters = () => {
+    setAppliedFilters({
+      priceMin: priceMin ? parseInt(priceMin) : 0,
+      priceMax: priceMax ? parseInt(priceMax) : Infinity,
+      dateFrom: formatDateForCompare(dateFrom),
+      dateTo: formatDateForCompare(dateTo)
+    });
+    setShowFilters(false);
+  };
+
+  // Функция сброса фильтров
+  const resetFilters = () => {
+    setPriceMin('');
+    setPriceMax('');
+    setDateFrom('');
+    setDateTo('');
+    setAppliedFilters({
+      priceMin: 0,
+      priceMax: Infinity,
+      dateFrom: '',
+      dateTo: ''
+    });
+  };
+
+  // Подсчет активных фильтров
+  const getActiveFiltersCount = () => {
+    let count = 0;
+    if (appliedFilters.priceMin > 0) count++;
+    if (appliedFilters.priceMax < Infinity && appliedFilters.priceMax !== 0) count++;
+    if (appliedFilters.dateFrom) count++;
+    if (appliedFilters.dateTo) count++;
+    return count;
+  };
+
+  // Получаем количество активных фильтров
+  const activeFiltersCount = getActiveFiltersCount();
+
+  // Фильтрация площадок по категории, поисковому запросу, цене и датам
   const filteredVenues = VENUES.filter(venue => {
+    // Фильтр по категории
     const matchesCategory = selectedCategory === 'Все' || venue.category === selectedCategory;
+    
+    // Фильтр по поисковому запросу
     const matchesSearch = venue.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          venue.location.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    
+    // Фильтр по цене
+    const matchesPrice = venue.price >= appliedFilters.priceMin && 
+                        venue.price <= appliedFilters.priceMax;
+    
+    // Фильтр по датам
+    let matchesDates = true;
+    if (appliedFilters.dateFrom) {
+      matchesDates = matchesDates && venue.endDate >= appliedFilters.dateFrom;
+    }
+    if (appliedFilters.dateTo) {
+      matchesDates = matchesDates && venue.startDate <= appliedFilters.dateTo;
+    }
+    
+    return matchesCategory && matchesSearch && matchesPrice && matchesDates;
   });
+
+  const navigateToDetails = (venue: Venue) => {
+    router.push({
+      pathname: '/venue-details',
+      params: {
+        id: venue.id,
+        title: venue.title,
+        location: venue.location,
+        description: venue.description,
+        price: venue.price,
+        category: venue.category,
+        image: venue.image,
+        startDate: venue.startDate,
+        endDate: venue.endDate
+      }
+    });
+  };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Каталог площадок</Text>
+        <Text style={styles.welcomeText}>Привет, Александр</Text>
+        <Text style={styles.title}>Где разместить рекламу?</Text>
+        
         <View style={styles.searchContainer}>
-          <Search size={20} color="#666" style={styles.searchIcon} />
+          <Search size={20} color={COLORS.textLight} style={styles.searchIcon} />
           <TextInput
             style={styles.searchInput}
             placeholder="Поиск площадок..."
-            placeholderTextColor="#999"
+            placeholderTextColor={COLORS.textLight}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
-          <TouchableOpacity style={styles.filterButton}>
-            <Sliders size={20} color="#6E88F5" />
+          <TouchableOpacity 
+            style={styles.filterButton}
+            onPress={() => setShowFilters(true)}
+          >
+            {activeFiltersCount > 0 && (
+              <View style={styles.filterBadge}>
+                {activeFiltersCount > 1 && (
+                  <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
+                )}
+              </View>
+            )}
+            <Sliders size={20} color={COLORS.primary} />
           </TouchableOpacity>
         </View>
-        <ScrollView
+      </View>
+
+      {/* Модальное окно фильтров */}
+      <Modal
+        visible={showFilters}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowFilters(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Фильтры</Text>
+              <TouchableOpacity
+                style={styles.closeButton}
+                onPress={() => setShowFilters(false)}
+              >
+                <X size={24} color={COLORS.text} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Фильтр по цене */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Цена (₽/месяц)</Text>
+              <View style={styles.priceInputsContainer}>
+                <View style={styles.priceInputWrapper}>
+                  <DollarSign size={18} color={COLORS.textLight} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.priceInput}
+                    placeholder="от"
+                    keyboardType="number-pad"
+                    value={priceMin}
+                    onChangeText={setPriceMin}
+                    placeholderTextColor={COLORS.textLight}
+                  />
+                </View>
+                <View style={styles.priceDivider} />
+                <View style={styles.priceInputWrapper}>
+                  <DollarSign size={18} color={COLORS.textLight} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.priceInput}
+                    placeholder="до"
+                    keyboardType="number-pad"
+                    value={priceMax}
+                    onChangeText={setPriceMax}
+                    placeholderTextColor={COLORS.textLight}
+                  />
+                </View>
+              </View>
+            </View>
+
+            {/* Фильтр по датам */}
+            <View style={styles.filterSection}>
+              <Text style={styles.filterSectionTitle}>Период размещения</Text>
+              <View style={styles.dateInputsContainer}>
+                <View style={styles.dateInputWrapper}>
+                  <Calendar size={18} color={COLORS.textLight} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.dateInput}
+                    placeholder="С (дд.мм.гггг)"
+                    value={dateFrom}
+                    onChangeText={setDateFrom}
+                    placeholderTextColor={COLORS.textLight}
+                  />
+                </View>
+                <View style={styles.dateDivider} />
+                <View style={styles.dateInputWrapper}>
+                  <Calendar size={18} color={COLORS.textLight} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.dateInput}
+                    placeholder="По (дд.мм.гггг)"
+                    value={dateTo}
+                    onChangeText={setDateTo}
+                    placeholderTextColor={COLORS.textLight}
+                  />
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.filterActions}>
+              <TouchableOpacity 
+                style={styles.resetButton}
+                onPress={resetFilters}
+              >
+                <Text style={styles.resetButtonText}>Сбросить</Text>
+              </TouchableOpacity>
+              <TouchableOpacity 
+                style={styles.applyButton}
+                onPress={applyFilters}
+              >
+                <Text style={styles.applyButtonText}>Применить</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <View style={styles.categoriesWrapper}>
+        <ScrollView 
           horizontal
           showsHorizontalScrollIndicator={false}
           style={styles.categoriesContainer}
+          contentContainerStyle={styles.categoriesContent}
         >
-          {CATEGORIES.map((category, index) => (
+          {CATEGORIES.map((category) => (
             <TouchableOpacity
               key={category}
               onPress={() => setSelectedCategory(category)}
@@ -103,24 +318,32 @@ export default function CatalogScreen() {
         </ScrollView>
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView 
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={styles.sectionTitle}>
+          {filteredVenues.length > 0 
+            ? 'Рекомендуемые площадки' 
+            : 'Площадки не найдены'}
+        </Text>
+        
         {filteredVenues.map((venue, index) => (
           <Animated.View
             key={venue.id}
             entering={FadeInRight.delay(index * 100)}
-            style={styles.card}
+            style={styles.cardContainer}
           >
-            <Image 
-              source={{ uri: venue.image }}
-              style={styles.cardImage}
-              resizeMode="cover"
+            <Card
+              title={venue.title}
+              image={venue.image}
+              price={`${venue.price.toLocaleString()} ₽/мес`}
+              location={venue.location}
+              startDate={venue.startDate}
+              endDate={venue.endDate}
+              onPress={() => navigateToDetails(venue)}
             />
-            <View style={styles.cardContent}>
-              <Text style={styles.cardTitle}>{venue.title}</Text>
-              <Text style={styles.cardLocation}>{venue.location}</Text>
-              <Text style={styles.cardDescription}>{venue.description}</Text>
-              <Text style={styles.cardPrice}>от {venue.price.toLocaleString()} ₽/мес</Text>
-            </View>
           </Animated.View>
         ))}
       </ScrollView>
@@ -131,108 +354,225 @@ export default function CatalogScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFF',
+    backgroundColor: COLORS.background,
   },
   header: {
-    backgroundColor: '#FFF',
-    padding: 20,
+    backgroundColor: COLORS.white,
+    padding: SPACING.lg,
     paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    ...SHADOWS.small,
+  },
+  welcomeText: {
+    fontSize: 14,
+    color: COLORS.textLight,
+    marginBottom: SPACING.xs,
   },
   title: {
-    fontFamily: 'Manrope-Bold',
-    fontSize: 28,
-    color: '#333',
-    marginBottom: 20,
+    fontSize: 24,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.lg,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F9FAFF',
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 20,
+    backgroundColor: 'rgba(248, 245, 230, 0.7)',
+    borderRadius: LAYOUT.borderRadius.medium,
+    padding: SPACING.sm,
+    marginBottom: SPACING.sm,
   },
   searchIcon: {
-    marginRight: 10,
+    marginRight: SPACING.sm,
   },
   searchInput: {
     flex: 1,
-    fontFamily: 'Manrope-Regular',
     fontSize: 16,
-    color: '#333',
+    color: COLORS.text,
   },
   filterButton: {
-    padding: 5,
+    padding: SPACING.xs,
+    position: 'relative',
+  },
+  filterBadge: {
+    position: 'absolute',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: COLORS.primary,
+    top: 0,
+    right: 0,
+    zIndex: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  filterBadgeText: {
+    color: COLORS.white,
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  categoriesWrapper: {
+    marginVertical: SPACING.md,
+    paddingBottom: SPACING.xs,
   },
   categoriesContainer: {
-    flexDirection: 'row',
-    marginTop: 10,
+    maxHeight: 56,
+  },
+  categoriesContent: {
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.sm,
   },
   categoryButton: {
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
     borderRadius: 20,
-    marginRight: 10,
-    backgroundColor: '#F9FAFF',
+    marginRight: SPACING.sm,
+    backgroundColor: COLORS.white,
+    ...SHADOWS.small,
+    height: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   categoryButtonActive: {
-    backgroundColor: '#6E88F5',
+    backgroundColor: COLORS.primary,
   },
   categoryText: {
-    fontFamily: 'Manrope-Regular',
     fontSize: 14,
-    color: '#666',
+    color: COLORS.text,
   },
   categoryTextActive: {
-    color: '#FFF',
-    fontFamily: 'Manrope-Bold',
+    color: COLORS.white,
+    fontWeight: '600',
   },
   content: {
-    padding: 20,
+    flex: 1,
   },
-  card: {
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    elevation: 5,
+  contentContainer: {
+    padding: SPACING.lg,
+    paddingTop: 0,
   },
-  cardImage: {
-    height: 180,
-    backgroundColor: '#F0F0F0',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    width: '100%',
-  },
-  cardContent: {
-    padding: 20,
-  },
-  cardTitle: {
-    fontFamily: 'Manrope-Bold',
+  sectionTitle: {
     fontSize: 18,
-    color: '#333',
-    marginBottom: 8,
+    fontWeight: '700',
+    color: COLORS.text,
+    marginBottom: SPACING.md,
   },
-  cardLocation: {
-    fontFamily: 'Manrope-Regular',
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+  cardContainer: {
+    marginBottom: SPACING.md,
   },
-  cardDescription: {
-    fontFamily: 'Manrope-Regular',
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 8,
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
   },
-  cardPrice: {
-    fontFamily: 'Manrope-Bold',
+  modalContent: {
+    backgroundColor: COLORS.white,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    padding: SPACING.lg,
+    paddingTop: SPACING.md,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.lg,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  closeButton: {
+    padding: SPACING.xs,
+  },
+  filterSection: {
+    marginBottom: SPACING.lg,
+  },
+  filterSectionTitle: {
     fontSize: 16,
-    color: '#6E88F5',
+    fontWeight: '600',
+    color: COLORS.text,
+    marginBottom: SPACING.sm,
+  },
+  priceInputsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  priceInputWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(248, 245, 230, 0.7)',
+    borderRadius: LAYOUT.borderRadius.medium,
+    paddingHorizontal: SPACING.sm,
+  },
+  priceDivider: {
+    width: 10,
+    height: 1,
+    backgroundColor: COLORS.textLight,
+    marginHorizontal: SPACING.sm,
+  },
+  priceInput: {
+    flex: 1,
+    padding: SPACING.sm,
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  inputIcon: {
+    marginRight: SPACING.xs,
+  },
+  dateInputsContainer: {
+    flexDirection: 'column',
+    gap: SPACING.sm,
+  },
+  dateInputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(248, 245, 230, 0.7)',
+    borderRadius: LAYOUT.borderRadius.medium,
+    paddingHorizontal: SPACING.sm,
+  },
+  dateDivider: {
+    height: 8,
+  },
+  dateInput: {
+    flex: 1,
+    padding: SPACING.sm,
+    fontSize: 16,
+    color: COLORS.text,
+  },
+  filterActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: SPACING.lg,
+    paddingBottom: Platform.OS === 'ios' ? 30 : 0,
+  },
+  resetButton: {
+    padding: SPACING.md,
+    borderRadius: LAYOUT.borderRadius.medium,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  resetButtonText: {
+    color: COLORS.primary,
+    fontWeight: '600',
+    fontSize: 16,
+  },
+  applyButton: {
+    padding: SPACING.md,
+    borderRadius: LAYOUT.borderRadius.medium,
+    backgroundColor: COLORS.primary,
+    minWidth: 120,
+    alignItems: 'center',
+  },
+  applyButtonText: {
+    color: COLORS.white,
+    fontWeight: '600',
+    fontSize: 16,
   },
 });

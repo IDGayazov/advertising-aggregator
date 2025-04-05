@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import { ArrowLeft, Plus } from 'lucide-react-native';
+import { ArrowLeft, Plus, Calendar } from 'lucide-react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 
 // Используем те же данные площадок, что и раньше
@@ -11,13 +11,22 @@ const MY_VENUES = [
     title: 'Билборд на Невском',
     location: 'Невский проспект, 1',
     status: 'active', // active, pending, inactive
-    image: 'https://media.istockphoto.com/id/994853998/ru/%D1%84%D0%BE%D1%82%D0%BE/%D0%B4%D0%BE%D0%BC-%D0%BF%D0%B5%D0%B2%D0%B8%D1%86%D1%8B-%D0%BD%D0%B0-%D0%BD%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%BC-%D0%BF%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%D0%B5.jpg?s=612x612&w=0&k=20&c=r-yhxP8XqeToGao0tZeW7I9KLHOxzSxcw7hFj3XlRSA='
+    image: 'https://media.istockphoto.com/id/994853998/ru/%D1%84%D0%BE%D1%82%D0%BE/%D0%B4%D0%BE%D0%BC-%D0%BF%D0%B5%D0%B2%D0%B8%D1%86%D1%8B-%D0%BD%D0%B0-%D0%BD%D0%B5%D0%B2%D1%81%D0%BA%D0%BE%D0%BC-%D0%BF%D1%80%D0%BE%D1%81%D0%BF%D0%B5%D0%BA%D1%82%D0%B5.jpg?s=612x612&w=0&k=20&c=r-yhxP8XqeToGao0tZeW7I9KLHOxzSxcw7hFj3XlRSA=',
+    startDate: '2023-05-01',
+    endDate: '2023-07-31'
   },
   // Добавьте другие площадки...
 ];
 
 export default function MyVenuesScreen() {
   const router = useRouter();
+
+  // Форматируем даты
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+  };
 
   return (
     <View style={styles.container}>
@@ -59,6 +68,16 @@ export default function MyVenuesScreen() {
                 </View>
               </View>
               <Text style={styles.venueLocation}>{venue.location}</Text>
+              
+              {venue.startDate && venue.endDate && (
+                <View style={styles.dateContainer}>
+                  <Calendar size={16} color="#666" />
+                  <Text style={styles.dateText}>
+                    {formatDate(venue.startDate)} - {formatDate(venue.endDate)}
+                  </Text>
+                </View>
+              )}
+              
               <TouchableOpacity 
                 style={styles.editButton}
                 onPress={() => router.push(`/venue-details?id=${venue.id}`)}
@@ -149,6 +168,17 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
     marginBottom: 12,
+  },
+  dateContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  dateText: {
+    fontFamily: 'Manrope-Regular',
+    fontSize: 14,
+    color: '#666',
+    marginLeft: 8,
   },
   editButton: {
     backgroundColor: '#F0F4FF',

@@ -1,5 +1,6 @@
 import { Tabs } from 'expo-router';
 import { LayoutGrid, User, FileText, Bell } from 'lucide-react-native';
+import { COLORS } from '../../../utils/theme';
 
 export default function TabLayout() {
   return (
@@ -7,11 +8,22 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: '#FFF',
-          borderTopColor: '#F0F0F0',
+          backgroundColor: COLORS.white,
+          borderTopColor: COLORS.border,
+          elevation: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          height: 60,
         },
-        tabBarActiveTintColor: '#6E88F5',
-        tabBarInactiveTintColor: '#999',
+        tabBarActiveTintColor: COLORS.primary,
+        tabBarInactiveTintColor: COLORS.textLight,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: '500',
+          marginBottom: 5,
+        },
       }}>
       <Tabs.Screen
         name="index"
