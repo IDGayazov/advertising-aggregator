@@ -85,16 +85,16 @@ export default function OrdersScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.screenTitle}>Заказы</Text>
+        {/* <Text style={styles.screenTitle}>Заказы</Text> */}
         <Text style={styles.title}>Мои рекламные кампании</Text>
-        {orders.length > 0 && (
+        {/* {orders.length > 0 && (
           <TouchableOpacity 
             style={styles.clearButton}
             onPress={handleClearAll}
           >
             <Text style={styles.clearButtonText}>Очистить все</Text>
           </TouchableOpacity>
-        )}
+        )} */}
       </View>
 
       <ScrollView 

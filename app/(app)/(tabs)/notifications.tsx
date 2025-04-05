@@ -88,7 +88,7 @@ export default function NotificationsScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.screenTitle}>Уведомления</Text>
+        {/* <Text style={styles.screenTitle}>Уведомления</Text> */}
         <View style={styles.titleRow}>
           <Text style={styles.title}>Обновления</Text>
           {unreadCount > 0 && (

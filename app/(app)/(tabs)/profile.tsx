@@ -65,7 +65,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.screenTitle}>Профиль</Text>
+        {/* <Text style={styles.screenTitle}>Профиль</Text> */}
         <View style={styles.headerContent}>
           <View style={styles.avatarContainer}>
             <Image
