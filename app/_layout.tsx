@@ -31,26 +31,22 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.container}>
       <StatusBar style="dark" backgroundColor={COLORS.white} />
-      <Stack 
-        screenOptions={{ 
+      <Stack
+        screenOptions={{
           headerShown: false,
-          contentStyle: { backgroundColor: COLORS.background },
-          animation: 'fade',
+          contentStyle: {
+            backgroundColor: COLORS.white,
+          },
+          presentation: 'modal',
+          animation: 'slide_from_right',
+          animationDuration: 200,
+          gestureEnabled: true,
+          gestureDirection: 'horizontal',
+          fullScreenGestureEnabled: true,
         }}
       >
-        <Stack.Screen
-          name="(auth)"
-          options={{
-            // Prevent going back to protected screens
-            headerShown: false,
-          }}
-        />
-        <Stack.Screen
-          name="(app)"
-          options={{
-            headerShown: false,
-          }}
-        />
+        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(app)" />
       </Stack>
     </GestureHandlerRootView>
   );
