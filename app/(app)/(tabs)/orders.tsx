@@ -11,7 +11,7 @@ const INITIAL_ORDERS = [
   {
     id: 1,
     venueId: 1,
-    title: 'Билборд на Невском',
+    title: 'Билборд на Чистопольской',
     status: 'pending',
     date: '15.02.2024 - 15.03.2024',
     price: '45 000 ₽',
