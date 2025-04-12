@@ -37,7 +37,7 @@ const VENUES: Venue[] = [
   {
     id: 2,
     title: 'Лифт',
-    location: 'Невский проспект, 1',
+    location: 'Меридианная, 41',
     description: 'плакат',
     price: 45000,
     category: 'Лифты',
