@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { LayoutGrid, User, FileText, Bell } from 'lucide-react-native';
+import { LayoutGrid, User, FileText, Bell, Package } from 'lucide-react-native';
 import { COLORS } from '../../../utils/theme';
 
 export default function TabLayout() {
@@ -59,6 +59,13 @@ export default function TabLayout() {
           tabBarIcon: ({ color, size }) => (
             <User size={size} color={color} />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="ad-packages"
+        options={{
+          title: 'Пакеты',
+          tabBarIcon: ({ color }) => <Package size={24} color={color} />,
         }}
       />
     </Tabs>

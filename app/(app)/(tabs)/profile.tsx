@@ -12,12 +12,12 @@ const MENU_ITEMS = [
     description: 'Управление рекламными местами',
     color: COLORS.primary,
   },
-  {
-    icon: CreditCard,
-    title: 'Платежи',
-    description: 'История операций и счета',
-    color: COLORS.primary,
-  },
+  // {
+  //   icon: CreditCard,
+  //   title: 'Платежи',
+  //   description: 'История операций и счета',
+  //   color: COLORS.primary,
+  // },
   {
     icon: Bell,
     title: 'Уведомления',
