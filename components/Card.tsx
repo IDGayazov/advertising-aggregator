@@ -1,7 +1,8 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ViewStyle, Animated as RNAnimated, ToastAndroid, Platform } from 'react-native';
 import { COLORS, SHADOWS, LAYOUT, SPACING, TYPOGRAPHY } from '../utils/theme';
-import { Star, Calendar } from 'lucide-react-native';
+import { Star, Calendar, Plus, Check } from 'lucide-react-native';
+import { usePackage } from '../context/PackageContext';
 
 interface CardProps {
   title: string;
@@ -14,6 +15,7 @@ interface CardProps {
   endDate?: string;
   style?: ViewStyle;
   onPress?: () => void;
+  venue?: any; // Добавляем объект площадки
 }
 
 export default function Card({
@@ -27,7 +29,11 @@ export default function Card({
   endDate,
   style,
   onPress,
+  venue,
 }: CardProps) {
+  const { addToPackage, isInPackage } = usePackage();
+  const inPackage = venue ? isInPackage(venue.id) : false;
+
   // Преобразуем цену в строку с правильным форматированием
   const formattedPrice = typeof price === 'number' ? `₽${price.toLocaleString()}` : price;
 
@@ -38,13 +44,63 @@ export default function Card({
     return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
   };
 
+  const handleAddToPackage = (e: any) => {
+    e.stopPropagation();
+    if (venue && !inPackage) {
+      // Анимация при добавлении
+      const animation = RNAnimated.sequence([
+        RNAnimated.timing(scaleAnim, {
+          toValue: 1.2,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        RNAnimated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]);
+      
+      animation.start(() => {
+        addToPackage(venue);
+        
+        // Показать уведомление
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('Добавлено в пакет', ToastAndroid.SHORT);
+        }
+      });
+    }
+  };
+
+  // Анимация для кнопки
+  const scaleAnim = useRef(new RNAnimated.Value(1)).current;
+
   return (
     <TouchableOpacity
       style={[styles.container, style]}
       onPress={onPress}
       disabled={!onPress}
     >
-      <Image source={{ uri: image }} style={styles.image} />
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: image }} style={styles.image} />
+        
+        {/* Кнопка добавления в пакет в правом верхнем углу */}
+        {venue && (
+          <TouchableOpacity 
+            style={[styles.cornerAddButton, inPackage && styles.cornerAddButtonActive]} 
+            onPress={handleAddToPackage}
+            disabled={inPackage}
+          >
+            <RNAnimated.View style={{ transform: [{ scale: scaleAnim }] }}>
+              {inPackage ? (
+                <Check size={18} color={COLORS.white} />
+              ) : (
+                <Plus size={18} color={COLORS.white} />
+              )}
+            </RNAnimated.View>
+          </TouchableOpacity>
+        )}
+      </View>
       
       <View style={styles.content}>
         {rating && (
@@ -85,10 +141,28 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...SHADOWS.small,
   },
+  imageContainer: {
+    position: 'relative',
+  },
   image: {
     width: '100%',
     height: 160,
     backgroundColor: COLORS.border,
+  },
+  cornerAddButton: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 2,
+  },
+  cornerAddButtonActive: {
+    backgroundColor: 'rgba(180, 140, 47, 0.8)',
   },
   content: {
     padding: SPACING.md,
@@ -135,5 +209,5 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: COLORS.primary,
     marginTop: SPACING.xs,
-  },
+  }
 }); 
