@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Animated, StatusBar, Modal } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Animated, StatusBar, Modal, ToastAndroid, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, MapPin, Search, X, Calendar } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Search, X, Calendar, Plus, Minus } from 'lucide-react-native';
 import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../utils/theme';
 import Button from '../../components/Button';
 import { PanGestureHandler } from 'react-native-gesture-handler';
+import { usePackage } from '../../context/PackageContext';
 
 const { width, height } = Dimensions.get('window');
 const MIN_SHEET_HEIGHT = height * 0.4; // Минимальная высота (закрытое состояние)
@@ -28,6 +29,10 @@ export default function VenueDetailsScreen() {
   const [sheetHeight] = useState(new Animated.Value(MIN_SHEET_HEIGHT));
   const [currentHeight, setCurrentHeight] = useState(MIN_SHEET_HEIGHT);
   const [imageModalVisible, setImageModalVisible] = useState(false);
+  const { addToPackage, removeFromPackage, isInPackage } = usePackage();
+  const venueId = parseInt(params.id, 10);
+  const inPackage = isInPackage(venueId);
+  const buttonScale = useRef(new Animated.Value(1)).current;
 
   // Форматируем даты
   const formatDate = (dateString?: string) => {
@@ -107,6 +112,50 @@ export default function VenueDetailsScreen() {
     }
   };
 
+  // Создаем функцию для добавления в пакет
+  const handleAddToPackage = () => {
+    // Анимируем кнопку
+    Animated.sequence([
+      Animated.timing(buttonScale, {
+        toValue: 1.2,
+        duration: 150,
+        useNativeDriver: true
+      }),
+      Animated.timing(buttonScale, {
+        toValue: 1, 
+        duration: 150,
+        useNativeDriver: true
+      })
+    ]).start(() => {
+      // После анимации выполняем действие с пакетом
+      if (inPackage) {
+        removeFromPackage(venueId);
+        
+        // Показываем уведомление
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('Удалено из пакета', ToastAndroid.SHORT);
+        }
+      } else {
+        addToPackage({
+          id: venueId,
+          title: params.title,
+          location: params.location,
+          description: params.description,
+          price: parseInt(params.price, 10),
+          category: params.category,
+          image: params.image,
+          startDate: params.startDate,
+          endDate: params.endDate
+        });
+        
+        // Показываем уведомление
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('Добавлено в пакет', ToastAndroid.SHORT);
+        }
+      }
+    });
+  };
+
   if (!params.image) {
     return null;
   }
@@ -131,12 +180,27 @@ export default function VenueDetailsScreen() {
           <ArrowLeft size={24} color={COLORS.white} />
         </TouchableOpacity>
         
-        <TouchableOpacity 
-          style={styles.searchButton}
-          onPress={() => setImageModalVisible(true)}
-        >
-          <Search size={24} color={COLORS.white} />
-        </TouchableOpacity>
+        <View style={styles.rightButtons}>
+          <TouchableOpacity 
+            style={[styles.actionButton, inPackage && styles.actionButtonActive]}
+            onPress={handleAddToPackage}
+          >
+            <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
+              {inPackage ? (
+                <Minus size={20} color={COLORS.white} />
+              ) : (
+                <Plus size={20} color={COLORS.white} />
+              )}
+            </Animated.View>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            style={styles.actionButton}
+            onPress={() => setImageModalVisible(true)}
+          >
+            <Search size={20} color={COLORS.white} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.titleHeader}>
@@ -229,7 +293,7 @@ export default function VenueDetailsScreen() {
           <View style={styles.footer}>
             <Button 
               title="Забронировать" 
-              onPress={() => {}} 
+              onPress={() => {}}
               style={styles.bookButton}
             />
           </View>
@@ -302,13 +366,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  searchButton: {
+  rightButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  actionButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.4)',
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: SPACING.sm,
+  },
+  actionButtonActive: {
+    backgroundColor: 'rgba(180, 140, 47, 0.8)',
   },
   bottomSheet: {
     position: 'absolute',

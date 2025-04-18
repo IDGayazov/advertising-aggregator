@@ -350,6 +350,7 @@ export default function CatalogScreen() {
               startDate={venue.startDate}
               endDate={venue.endDate}
               onPress={() => navigateToDetails(venue)}
+              venue={venue}
             />
           </Animated.View>
         ))}
