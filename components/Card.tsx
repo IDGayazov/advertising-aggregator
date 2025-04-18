@@ -1,7 +1,7 @@
 import React, { useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ViewStyle, Animated as RNAnimated, ToastAndroid, Platform } from 'react-native';
 import { COLORS, SHADOWS, LAYOUT, SPACING, TYPOGRAPHY } from '../utils/theme';
-import { Star, Calendar, Plus, Check } from 'lucide-react-native';
+import { Star, Calendar, Plus, Check, Minus } from 'lucide-react-native';
 import { usePackage } from '../context/PackageContext';
 
 interface CardProps {
@@ -31,7 +31,7 @@ export default function Card({
   onPress,
   venue,
 }: CardProps) {
-  const { addToPackage, isInPackage } = usePackage();
+  const { addToPackage, removeFromPackage, isInPackage } = usePackage();
   const inPackage = venue ? isInPackage(venue.id) : false;
 
   // Преобразуем цену в строку с правильным форматированием
@@ -46,30 +46,41 @@ export default function Card({
 
   const handleAddToPackage = (e: any) => {
     e.stopPropagation();
-    if (venue && !inPackage) {
-      // Анимация при добавлении
-      const animation = RNAnimated.sequence([
-        RNAnimated.timing(scaleAnim, {
-          toValue: 1.2,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-        RNAnimated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]);
-      
-      animation.start(() => {
+    
+    if (!venue) return;
+    
+    // Анимация при действии с пакетом
+    const animation = RNAnimated.sequence([
+      RNAnimated.timing(scaleAnim, {
+        toValue: 1.2,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      RNAnimated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]);
+    
+    animation.start(() => {
+      // Если уже в пакете - удаляем, иначе - добавляем
+      if (inPackage) {
+        removeFromPackage(venue.id);
+        
+        // Показать уведомление
+        if (Platform.OS === 'android') {
+          ToastAndroid.show('Удалено из пакета', ToastAndroid.SHORT);
+        }
+      } else {
         addToPackage(venue);
         
         // Показать уведомление
         if (Platform.OS === 'android') {
           ToastAndroid.show('Добавлено в пакет', ToastAndroid.SHORT);
         }
-      });
-    }
+      }
+    });
   };
 
   // Анимация для кнопки
@@ -84,16 +95,15 @@ export default function Card({
       <View style={styles.imageContainer}>
         <Image source={{ uri: image }} style={styles.image} />
         
-        {/* Кнопка добавления в пакет в правом верхнем углу */}
+        {/* Кнопка добавления/удаления из пакета в правом верхнем углу */}
         {venue && (
           <TouchableOpacity 
             style={[styles.cornerAddButton, inPackage && styles.cornerAddButtonActive]} 
             onPress={handleAddToPackage}
-            disabled={inPackage}
           >
             <RNAnimated.View style={{ transform: [{ scale: scaleAnim }] }}>
               {inPackage ? (
-                <Check size={18} color={COLORS.white} />
+                <Minus size={18} color={COLORS.white} />
               ) : (
                 <Plus size={18} color={COLORS.white} />
               )}

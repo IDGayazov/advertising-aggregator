@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Dimensions, Animated, StatusBar, Modal, ToastAndroid, Platform } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { ArrowLeft, MapPin, Search, X, Calendar, Plus, Check } from 'lucide-react-native';
+import { ArrowLeft, MapPin, Search, X, Calendar, Plus, Minus } from 'lucide-react-native';
 import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../utils/theme';
 import Button from '../../components/Button';
 import { PanGestureHandler } from 'react-native-gesture-handler';
@@ -187,7 +187,7 @@ export default function VenueDetailsScreen() {
           >
             <Animated.View style={{ transform: [{ scale: buttonScale }] }}>
               {inPackage ? (
-                <Check size={20} color={COLORS.white} />
+                <Minus size={20} color={COLORS.white} />
               ) : (
                 <Plus size={20} color={COLORS.white} />
               )}
