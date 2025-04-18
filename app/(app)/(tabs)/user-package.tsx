@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
-import { Trash2, CalendarDays, MapPin, ShoppingBag } from 'lucide-react-native';
+import { Trash2, CalendarDays, MapPin, ShoppingBag, DollarSign, Clock, Users } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { COLORS, SHADOWS, SPACING, LAYOUT } from '../../../utils/theme';
@@ -48,7 +48,7 @@ export default function UserPackageScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Мой пакет</Text>
+        <Text style={styles.title}>Мой рекламный пакет</Text>
         <Text style={styles.subtitle}>
           {userPackage.length > 0
             ? `${userPackage.length} ${userPackage.length === 1 ? 'площадка' : 
@@ -92,35 +92,54 @@ export default function UserPackageScreen() {
                     source={{ uri: venue.image }} 
                     style={styles.venueImage} 
                   />
-                  <View style={styles.venueDetails}>
-                    <Text style={styles.venueTitle}>{venue.title}</Text>
-                    <View style={styles.venueLocationRow}>
-                      <MapPin size={14} color={COLORS.textLight} />
-                      <Text style={styles.venueLocation}>{venue.location}</Text>
+                  <View style={styles.venueInfo}>
+                    <View style={styles.venueHeader}>
+                      <Text style={styles.venueTitle}>{venue.title}</Text>
+                      <TouchableOpacity 
+                        style={styles.removeButton}
+                        onPress={() => handleRemove(venue.id)}
+                      >
+                        <Trash2 size={18} color={COLORS.error} />
+                      </TouchableOpacity>
                     </View>
-                    
-                    {venue.startDate && venue.endDate && (
-                      <View style={styles.venueLocationRow}>
-                        <CalendarDays size={14} color={COLORS.textLight} />
-                        <Text style={styles.venueLocation}>
-                          {formatDate(venue.startDate)} - {formatDate(venue.endDate)}
-                        </Text>
+
+                    <View style={styles.venueDetails}>
+                      <View style={styles.detailRow}>
+                        <MapPin size={16} color={COLORS.textLight} />
+                        <Text style={styles.detailText}>{venue.location}</Text>
                       </View>
-                    )}
-                    
-                    <View style={styles.pricePill}>
+                      
+                      {venue.startDate && venue.endDate && (
+                        <View style={styles.detailRow}>
+                          <CalendarDays size={16} color={COLORS.textLight} />
+                          <Text style={styles.detailText}>
+                            {formatDate(venue.startDate)} - {formatDate(venue.endDate)}
+                          </Text>
+                        </View>
+                      )}
+
+                      {venue.duration && (
+                        <View style={styles.detailRow}>
+                          <Clock size={16} color={COLORS.textLight} />
+                          <Text style={styles.detailText}>{venue.duration}</Text>
+                        </View>
+                      )}
+
+                      {venue.coverage && (
+                        <View style={styles.detailRow}>
+                          <Users size={16} color={COLORS.textLight} />
+                          <Text style={styles.detailText}>{venue.coverage}</Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <View style={styles.priceContainer}>
+                      <DollarSign size={16} color={COLORS.primary} />
                       <Text style={styles.priceText}>
                         {venue.price.toLocaleString()} ₽/мес
                       </Text>
                     </View>
                   </View>
-                </TouchableOpacity>
-                
-                <TouchableOpacity 
-                  style={styles.removeButton}
-                  onPress={() => handleRemove(venue.id)}
-                >
-                  <Trash2 size={20} color={COLORS.error} />
                 </TouchableOpacity>
               </Animated.View>
             ))}
@@ -131,8 +150,8 @@ export default function UserPackageScreen() {
       {userPackage.length > 0 && (
         <View style={styles.bottomBar}>
           <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>Итого</Text>
-            <Text style={styles.totalPrice}>{packageTotalPrice.toLocaleString()} ₽/мес</Text>
+            <Text style={styles.totalLabel}>Итого в месяц</Text>
+            <Text style={styles.totalPrice}>{packageTotalPrice.toLocaleString()} ₽</Text>
           </View>
           <Button 
             title="Оформить заказ" 
@@ -156,16 +175,16 @@ const styles = StyleSheet.create({
     paddingTop: 60,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    ...SHADOWS.small,
+    ...SHADOWS.medium,
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     color: COLORS.text,
     marginBottom: SPACING.xs,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.textLight,
   },
   content: {
@@ -207,61 +226,67 @@ const styles = StyleSheet.create({
   },
   venueCard: {
     backgroundColor: COLORS.white,
-    borderRadius: LAYOUT.borderRadius.medium,
+    borderRadius: LAYOUT.borderRadius.large,
     marginBottom: SPACING.md,
-    flexDirection: 'row',
     overflow: 'hidden',
-    ...SHADOWS.small,
+    ...SHADOWS.medium,
   },
   cardContent: {
-    flex: 1,
     flexDirection: 'row',
   },
   venueImage: {
-    width: 100,
-    height: 100,
+    width: 120,
+    height: '100%',
     backgroundColor: COLORS.border,
   },
-  venueDetails: {
+  venueInfo: {
     flex: 1,
     padding: SPACING.md,
+  },
+  venueHeader: {
+    flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: SPACING.sm,
   },
   venueTitle: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: 17,
     fontWeight: 'bold',
     color: COLORS.text,
-    marginBottom: SPACING.xs,
+    marginRight: SPACING.sm,
   },
-  venueLocationRow: {
+  removeButton: {
+    padding: SPACING.xs,
+  },
+  venueDetails: {
+    marginBottom: SPACING.sm,
+  },
+  detailRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: SPACING.xs,
   },
-  venueLocation: {
+  detailText: {
     fontSize: 14,
     color: COLORS.textLight,
     marginLeft: SPACING.xs,
+    flex: 1,
   },
-  removeButton: {
-    padding: SPACING.md,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  pricePill: {
+  priceContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(180, 140, 47, 0.1)',
     paddingHorizontal: SPACING.sm,
-    paddingVertical: SPACING.xs/2,
-    borderRadius: 20,
+    paddingVertical: SPACING.xs,
+    borderRadius: LAYOUT.borderRadius.small,
     alignSelf: 'flex-start',
   },
   priceText: {
-    fontSize: 14,
+    fontSize: 15,
     color: COLORS.primary,
     fontWeight: 'bold',
-    marginLeft: 2,
+    marginLeft: SPACING.xs,
   },
   bottomBar: {
     position: 'absolute',
@@ -272,7 +297,7 @@ const styles = StyleSheet.create({
     padding: SPACING.lg,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    ...SHADOWS.medium,
+    ...SHADOWS.large,
   },
   totalRow: {
     flexDirection: 'row',
@@ -286,7 +311,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   totalPrice: {
-    fontSize: 18,
+    fontSize: 20,
     color: COLORS.primary,
     fontWeight: 'bold',
   },
