@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Alert } from 'react-native';
-import { Trash2, CalendarDays, MapPin, ShoppingBag, DollarSign } from 'lucide-react-native';
+import { Trash2, CalendarDays, MapPin, ShoppingBag } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import Animated, { FadeInUp } from 'react-native-reanimated';
 import { COLORS, SHADOWS, SPACING, LAYOUT } from '../../../utils/theme';
@@ -109,7 +109,6 @@ export default function UserPackageScreen() {
                     )}
                     
                     <View style={styles.pricePill}>
-                      <DollarSign size={12} color={COLORS.primary} />
                       <Text style={styles.priceText}>
                         {venue.price.toLocaleString()} ₽/мес
                       </Text>

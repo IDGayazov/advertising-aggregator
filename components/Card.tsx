@@ -35,7 +35,7 @@ export default function Card({
   const inPackage = venue ? isInPackage(venue.id) : false;
 
   // Преобразуем цену в строку с правильным форматированием
-  const formattedPrice = typeof price === 'number' ? `₽${price.toLocaleString()}` : price;
+  const formattedPrice = typeof price === 'number' ? `${price.toLocaleString()} ₽` : price;
 
   // Форматируем даты
   const formatDate = (dateString?: string) => {
