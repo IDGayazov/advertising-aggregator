@@ -1,21 +1,24 @@
 import React, { useRef } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ViewStyle, Animated as RNAnimated, ToastAndroid, Platform } from 'react-native';
-import { COLORS, SHADOWS, LAYOUT, SPACING, TYPOGRAPHY } from '../utils/theme';
-import { Star, Calendar, Plus, Check, Minus } from 'lucide-react-native';
+import { COLORS, SHADOWS, LAYOUT, SPACING } from '../utils/theme';
+import { Star, Calendar, Plus, Check, Minus, Users, Clock } from 'lucide-react-native';
 import { usePackage } from '../context/PackageContext';
+import { Venue } from '../types/venue';
 
 interface CardProps {
   title: string;
   image: string;
-  price: number | string;
+  price: number;
   location?: string;
   rating?: number;
   reviews?: number;
   startDate?: string;
   endDate?: string;
+  duration?: string;
+  coverage?: string;
   style?: ViewStyle;
   onPress?: () => void;
-  venue?: any; // Добавляем объект площадки
+  venue?: Venue;
 }
 
 export default function Card({
@@ -27,6 +30,8 @@ export default function Card({
   reviews,
   startDate,
   endDate,
+  duration,
+  coverage,
   style,
   onPress,
   venue,
@@ -35,7 +40,7 @@ export default function Card({
   const inPackage = venue ? isInPackage(venue.id) : false;
 
   // Преобразуем цену в строку с правильным форматированием
-  const formattedPrice = typeof price === 'number' ? `${price.toLocaleString()} ₽` : price;
+  const formattedPrice = `${price.toLocaleString()} ₽`;
 
   // Форматируем даты
   const formatDate = (dateString?: string) => {
@@ -64,18 +69,15 @@ export default function Card({
     ]);
     
     animation.start(() => {
-      // Если уже в пакете - удаляем, иначе - добавляем
       if (inPackage) {
         removeFromPackage(venue.id);
         
-        // Показать уведомление
         if (Platform.OS === 'android') {
           ToastAndroid.show('Удалено из пакета', ToastAndroid.SHORT);
         }
       } else {
         addToPackage(venue);
         
-        // Показать уведомление
         if (Platform.OS === 'android') {
           ToastAndroid.show('Добавлено в пакет', ToastAndroid.SHORT);
         }
@@ -95,7 +97,6 @@ export default function Card({
       <View style={styles.imageContainer}>
         <Image source={{ uri: image }} style={styles.image} />
         
-        {/* Кнопка добавления/удаления из пакета в правом верхнем углу */}
         {venue && (
           <TouchableOpacity 
             style={[styles.cornerAddButton, inPackage && styles.cornerAddButtonActive]} 
@@ -118,7 +119,7 @@ export default function Card({
             <Star size={16} color={COLORS.primary} fill={COLORS.primary} />
             <Text style={styles.rating}>{rating.toFixed(1)}</Text>
             {reviews && (
-              <Text style={styles.reviews}>({reviews} reviews)</Text>
+              <Text style={styles.reviews}>({reviews} отзывов)</Text>
             )}
           </View>
         )}

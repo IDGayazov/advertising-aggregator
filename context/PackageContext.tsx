@@ -1,17 +1,5 @@
-import React, { createContext, useState, useContext, ReactNode } from 'react';
-
-// Интерфейс для рекламной площадки
-export interface Venue {
-  id: number;
-  title: string;
-  location: string;
-  description: string;
-  price: number;
-  category: string;
-  image: string;
-  startDate: string;
-  endDate: string;
-}
+import React, { createContext, useContext, useState } from 'react';
+import { Venue } from '../types/venue';
 
 // Интерфейс для контекста
 interface PackageContextType {
@@ -26,49 +14,47 @@ interface PackageContextType {
 const PackageContext = createContext<PackageContextType | undefined>(undefined);
 
 // Провайдер контекста
-export const PackageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export function PackageProvider({ children }: { children: React.ReactNode }) {
   const [userPackage, setUserPackage] = useState<Venue[]>([]);
 
   // Добавить площадку в пакет
   const addToPackage = (venue: Venue) => {
-    if (!isInPackage(venue.id)) {
-      setUserPackage([...userPackage, venue]);
-    }
+    setUserPackage(prev => [...prev, venue]);
   };
 
   // Удалить площадку из пакета
   const removeFromPackage = (venueId: number) => {
-    setUserPackage(userPackage.filter(item => item.id !== venueId));
+    setUserPackage(prev => prev.filter(v => v.id !== venueId));
   };
 
   // Проверить, находится ли площадка в пакете
-  const isInPackage = (venueId: number): boolean => {
-    return userPackage.some(item => item.id === venueId);
+  const isInPackage = (venueId: number) => {
+    return userPackage.some(v => v.id === venueId);
   };
 
   // Расчет общей стоимости пакета
-  const packageTotalPrice = userPackage.reduce((total, venue) => total + venue.price, 0);
-
-  const value = {
-    userPackage,
-    addToPackage,
-    removeFromPackage,
-    isInPackage,
-    packageTotalPrice
-  };
+  const packageTotalPrice = userPackage.reduce((sum, venue) => sum + venue.price, 0);
 
   return (
-    <PackageContext.Provider value={value}>
+    <PackageContext.Provider 
+      value={{ 
+        userPackage, 
+        addToPackage, 
+        removeFromPackage, 
+        isInPackage,
+        packageTotalPrice,
+      }}
+    >
       {children}
     </PackageContext.Provider>
   );
-};
+}
 
 // Хук для использования контекста
-export const usePackage = (): PackageContextType => {
+export function usePackage() {
   const context = useContext(PackageContext);
   if (context === undefined) {
     throw new Error('usePackage must be used within a PackageProvider');
   }
   return context;
-}; 
+} 

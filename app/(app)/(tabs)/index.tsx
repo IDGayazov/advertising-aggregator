@@ -1,27 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, Platform } from 'react-native';
-import { Search, Sliders, MapPin, X, Calendar, DollarSign } from 'lucide-react-native';
+import { Search, Sliders, MapPin, X, Calendar, DollarSign, Filter } from 'lucide-react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../../utils/theme';
 import Card from '../../../components/Card';
+import Map from '../../../components/Map';
+import { Venue } from '../../../types/venue';
 
 const CATEGORIES = ['Все', 'Билборды', 'Лифты', 'Автобусы', 'Мероприятия'];
 
-// Определяем интерфейс для площадки
-interface Venue {
-  id: number;
-  title: string;
-  location: string;
-  description: string;
-  price: number;
-  category: string;
-  image: string;
-  startDate: string;
-  endDate: string;
-}
-
-// Пример данных (в реальном приложении это может приходить с API)
+// Примерные данные рекламных мест
 const VENUES: Venue[] = [
   {
     id: 1,
@@ -73,6 +62,7 @@ export default function CatalogScreen() {
     dateTo: ''
   });
   const router = useRouter();
+  const [selectedVenue, setSelectedVenue] = useState<number | null>(null);
 
   // Форматируем дату в строку ISO для сравнения
   const formatDateForCompare = (dateString: string) => {
@@ -149,28 +139,32 @@ export default function CatalogScreen() {
     return matchesCategory && matchesSearch && matchesPrice && matchesDates;
   });
 
-  const navigateToDetails = (venue: Venue) => {
+  const handleVenuePress = (venue: Venue) => {
     router.push({
       pathname: '/venue-details',
       params: {
         id: venue.id,
         title: venue.title,
         location: venue.location,
-        description: venue.description,
         price: venue.price,
-        category: venue.category,
         image: venue.image,
-        startDate: venue.startDate,
-        endDate: venue.endDate
+        duration: venue.duration,
+        coverage: venue.coverage,
+        latitude: venue.coordinates.latitude,
+        longitude: venue.coordinates.longitude,
       }
     });
+  };
+
+  const handleMarkerPress = (venue: Venue) => {
+    setSelectedVenue(venue.id);
   };
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.welcomeText}>Привет, Александр</Text>
-        <Text style={styles.title}>Где разместить рекламу?</Text>
+        <Text style={styles.title}>Каталог рекламных мест</Text>
         
         <View style={styles.searchContainer}>
           <Search size={20} color={COLORS.textLight} style={styles.searchIcon} />
@@ -190,7 +184,7 @@ export default function CatalogScreen() {
                 <Text style={styles.filterBadgeText}>{activeFiltersCount}</Text>
               </View>
             )}
-            <Sliders size={20} color={COLORS.primary} />
+            <Filter size={20} color={COLORS.text} />
           </TouchableOpacity>
         </View>
 
@@ -325,6 +319,12 @@ export default function CatalogScreen() {
         </ScrollView>
       </View>
 
+      <Map 
+        venues={filteredVenues}
+        onMarkerPress={handleMarkerPress}
+        style={styles.map}
+      />
+
       <ScrollView 
         style={styles.content}
         contentContainerStyle={styles.contentContainer}
@@ -349,8 +349,12 @@ export default function CatalogScreen() {
               location={venue.location}
               startDate={venue.startDate}
               endDate={venue.endDate}
-              onPress={() => navigateToDetails(venue)}
+              onPress={() => handleVenuePress(venue)}
               venue={venue}
+              style={[
+                styles.card,
+                selectedVenue === venue.id && styles.selectedCard
+              ]}
             />
           </Animated.View>
         ))}
@@ -591,5 +595,13 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     textAlign: 'center',
     marginTop: SPACING.sm,
+  },
+  map: {
+    height: 300,
+    margin: SPACING.lg,
+  },
+  selectedCard: {
+    borderColor: COLORS.primary,
+    borderWidth: 2,
   },
 });
