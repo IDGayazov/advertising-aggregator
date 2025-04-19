@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, Platform } from 'react-native';
-import { Search, Sliders, MapPin, X, Calendar, DollarSign } from 'lucide-react-native';
+import { Search, Sliders, MapPin, X, Calendar, DollarSign, Map as MapIcon } from 'lucide-react-native';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useRouter } from 'expo-router';
 import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../../utils/theme';
 import Card from '../../../components/Card';
+import YMap from '../../../components/YMap';
 
 const CATEGORIES = ['Все', 'Билборды', 'Лифты', 'Автобусы', 'Мероприятия'];
 
@@ -19,6 +20,10 @@ interface Venue {
   image: string;
   startDate: string;
   endDate: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 // Пример данных (в реальном приложении это может приходить с API)
@@ -72,6 +77,8 @@ export default function CatalogScreen() {
     dateFrom: '',
     dateTo: ''
   });
+  const [selectedVenue, setSelectedVenue] = useState<number | null>(null);
+  const [mapModalVisible, setMapModalVisible] = useState(false);
   const router = useRouter();
 
   // Форматируем дату в строку ISO для сравнения
@@ -166,6 +173,12 @@ export default function CatalogScreen() {
     });
   };
 
+  const handleMarkerPress = (venue: Venue) => {
+    setSelectedVenue(venue.id);
+    setMapModalVisible(false);
+    navigateToDetails(venue);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -193,6 +206,15 @@ export default function CatalogScreen() {
             <Sliders size={20} color={COLORS.primary} />
           </TouchableOpacity>
         </View>
+
+        {/* Кнопка для открытия карты */}
+        <TouchableOpacity
+          style={styles.mapButton}
+          onPress={() => setMapModalVisible(true)}
+        >
+          <MapIcon size={20} color={COLORS.white} />
+          <Text style={styles.mapButtonText}>Посмотреть на карте</Text>
+        </TouchableOpacity>
 
         {searchQuery.length > 0 && filteredVenues.length === 0 && (
           <Text style={styles.noResultsText}>
@@ -293,6 +315,36 @@ export default function CatalogScreen() {
               </TouchableOpacity>
             </View>
           </View>
+        </View>
+      </Modal>
+
+      {/* Модальное окно с картой */}
+      <Modal
+        visible={mapModalVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setMapModalVisible(false)}
+      >
+        <View style={styles.mapModalContainer}>
+          <View style={styles.mapModalHeader}>
+            <Text style={styles.mapModalTitle}>Доступные площадки</Text>
+            <TouchableOpacity
+              style={styles.closeMapButton}
+              onPress={() => setMapModalVisible(false)}
+            >
+              <X size={24} color={COLORS.text} />
+            </TouchableOpacity>
+          </View>
+          
+          <YMap
+            venues={filteredVenues}
+            onMarkerPress={handleMarkerPress}
+            style={styles.fullMapView}
+          />
+          
+          <Text style={styles.mapHintText}>
+            Нажмите на маркер, чтобы увидеть детали площадки
+          </Text>
         </View>
       </Modal>
 
@@ -591,5 +643,54 @@ const styles = StyleSheet.create({
     color: COLORS.textLight,
     textAlign: 'center',
     marginTop: SPACING.sm,
+  },
+  mapButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    borderRadius: LAYOUT.borderRadius.medium,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    marginTop: SPACING.sm,
+  },
+  mapButtonText: {
+    color: COLORS.white,
+    fontWeight: '600',
+    fontSize: 14,
+    marginLeft: SPACING.xs,
+  },
+  mapModalContainer: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+    marginTop: 60,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    ...SHADOWS.medium,
+  },
+  mapModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: SPACING.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.border,
+  },
+  mapModalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: COLORS.text,
+  },
+  closeMapButton: {
+    padding: SPACING.xs,
+  },
+  fullMapView: {
+    flex: 1,
+  },
+  mapHintText: {
+    textAlign: 'center',
+    color: COLORS.textLight,
+    padding: SPACING.md,
+    fontSize: 14,
   },
 });

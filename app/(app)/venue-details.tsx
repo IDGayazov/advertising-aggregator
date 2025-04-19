@@ -6,6 +6,7 @@ import { COLORS, SPACING, LAYOUT, SHADOWS } from '../../utils/theme';
 import Button from '../../components/Button';
 import { PanGestureHandler } from 'react-native-gesture-handler';
 import { usePackage } from '../../context/PackageContext';
+import YMap from '../../components/YMap';
 
 const { width, height } = Dimensions.get('window');
 const MIN_SHEET_HEIGHT = height * 0.4; // Минимальная высота (закрытое состояние)
@@ -156,6 +157,19 @@ export default function VenueDetailsScreen() {
     });
   };
 
+  // Создаем объект площадки для карты
+  const venue = {
+    id: venueId,
+    title: params.title as string,
+    location: params.location as string,
+    description: params.description as string,
+    price: price,
+    category: params.category as string,
+    image: params.image as string,
+    startDate: params.startDate as string,
+    endDate: params.endDate as string
+  };
+
   if (!params.image) {
     return null;
   }
@@ -287,6 +301,12 @@ export default function VenueDetailsScreen() {
                   </View>
                 ))}
               </View>
+
+              <Text style={styles.sectionTitle}>Расположение</Text>
+              <YMap 
+                singleVenue={venue}
+                style={styles.mapView}
+              />
             </View>
           </ScrollView>
           
@@ -545,5 +565,11 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: COLORS.textLight,
     marginHorizontal: SPACING.sm,
+  },
+  mapView: {
+    height: 200,
+    borderRadius: LAYOUT.borderRadius.medium,
+    marginBottom: SPACING.lg,
+    ...SHADOWS.small,
   },
 }); 

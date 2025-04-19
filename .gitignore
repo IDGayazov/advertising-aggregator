@@ -32,3 +32,8 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+# api keys
+config/apiKeys.ts
+
+.env
